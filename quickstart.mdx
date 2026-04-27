@@ -1,58 +1,158 @@
 ---
 title: Quickstart
-description: Minimal steps to customize this sample starter kit.
+description: Get started with the BookingPal Supplier API in minutes.
 ---
+
 ## Overview
 
-<Callout kind="alert" collapsed="false">
-  This site ships with placeholder content. Use this quickstart to replace it with your real product docs.
+This quickstart will guide you through making your first API call to the BookingPal Supplier API.
+
+<Callout kind="alert">
+Before starting, ensure your organization is registered and activated with BookingPal, and you have your login credentials. [Contact us](https://bookingpal.com/en/contact-us/) if you need access.
 </Callout>
 
-## 1. Update a page
+## Step 1: Authenticate
+
+Obtain a JWT token by calling the Login endpoint with your credentials.
 
 <Steps>
-  <Step title="Edit introduction" icon="edit" title-type="p">
-    Replace the sample introduction with a concise overview of your product and the key actions you want new users to take first.
+  <Step title="Call the Login endpoint" icon="key">
+    Send a `GET` request to `/authc/login` with your email and password as query parameters.
   </Step>
-
-  <Step title="Preview your change" icon="monitor" title-type="p">
-    Use your dashboard board editor to confirm the updated introduction looks and reads as expected.
+  <Step title="Save the token" icon="save">
+    The response includes a `token` field. Use this token in all subsequent requests as the `jwt` query parameter. Tokens are valid for **120 minutes**.
   </Step>
 </Steps>
 
-## 2. Add a new page
+**Example Request:**
 
-<Steps>
-  <Step title="Add a page" icon="file-text" title-type="p">
-    Create a new `page` by clicking on the + button from the left navigation bar of dashboard. If you are using git, create the .mdx file and add to navigation bar using documentation.json
-  </Step>
-</Steps>
+```bash
+curl -G "https://apidemo.mybookingpal.com/authc/login" \
+  --data-urlencode "username=your-email@example.com" \
+  --data-urlencode "password=your-password"
+```
 
-## Example onboarding flow (replace with yours)
+**Example Response:**
 
-1. Sign up for an account and verify your email.
+```json
+{
+  "token": "d5d308244d9eb48a/e9073f6d-85a1-49b8-a799-19c57b66fb24",
+  "partyId": 61692799,
+  "organizationId": 61690135,
+  "name": "Riverwalk Inn",
+  "currency": "USD",
+  "supplierId": 61692799,
+  "is_error": false
+}
+```
 
-2. Create your first workspace, project, or environment.
+## Step 2: List Your Property Managers
 
-3. Add one integration or data source to connect your existing tools.
+Use the token to fetch your Property Manager list.
 
-4. Complete a guided action (for example, run your first job or publish your first resource).
+```bash
+curl -G "https://apidemo.mybookingpal.com/pmlist" \
+  --data-urlencode "jwt=YOUR_TOKEN_HERE"
+```
 
-5. Invite a teammate and assign a basic role or permission.
+## Step 3: Create a Property
 
-## 3. Connect API Reference (optional)
+Create a new product (property) under a Property Manager.
 
-If you have an API, replace `openapi.yaml` with your real OpenAPI file. If you do not need an API reference, remove that tab either from dashboard or  `documentation.json`.
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/product?jwt=YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "name": {"language": "EN", "value": "Beach Villa"},
+      "rooms": 3,
+      "bathrooms": 2,
+      "persons": 6,
+      "propertyType": "VILLA",
+      "currency": "USD",
+      "supportedLosRates": false
+    }
+  }'
+```
 
-## Next steps
+## Step 4: Activate the Property
 
-<Columns cols="2">
-  <Card title="Core Concepts" href="/concepts" icon="layers" horizontal="false">
-    Keep the mental model simple and easy to scan.
+Activate the property so it can be distributed to channels.
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/product/activation?jwt=YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{"data": [1235124634]}'
+```
+
+## Step 5: Set Up Push Notifications
+
+Configure your webhook endpoints to receive real-time updates.
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/info?jwt=YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "reservationLink": "https://yourserver.com/reservation",
+      "asyncPush": "https://yourserver.com/async-push",
+      "requestToBook": "https://yourserver.com/request-to-book"
+    }
+  }'
+```
+
+## Step 6: Push Rates and Availability
+
+Send daily rates and availability for your property.
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/ra?jwt=YOUR_TOKEN_HERE" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "productId": "1235124634",
+      "ratesAvailabilities": [
+        {
+          "date": "2026-06-01",
+          "availableCount": 1,
+          "minStay": 3,
+          "maxStay": 14,
+          "rate": 150.00,
+          "currency": "USD"
+        }
+      ]
+    }
+  }'
+```
+
+## Token Types
+
+<Tabs>
+  <Tab title="PMS-Level Token" icon="building">
+    Used for requests related to PMS or Property Manager data.
+
+    **Endpoints:** Property Manager CRUD, PM List, Push Notifications, Channel Configuration
+  </Tab>
+  <Tab title="PM-Level Token" icon="user">
+    Used with PM credentials for managing properties.
+
+    **Endpoints:** Products, Rates & Availability, Images, Fees & Taxes, Reservations, Messaging
+  </Tab>
+</Tabs>
+
+## Next Steps
+
+<Columns cols={2}>
+  <Card title="Authentication Guide" icon="lock" href="/authentication" horizontal="false">
+    Detailed authentication flows and security considerations.
   </Card>
-
-  <Card title="Authentication" href="/authentication" icon="lock" horizontal="false">
-    Add your real auth flows and security notes.
+  <Card title="Core Concepts" icon="layers" href="/concepts" horizontal="false">
+    Understand the integration model and key entities.
+  </Card>
+  <Card title="API Reference" icon="code" href="/authentication" horizontal="false">
+    Full OpenAPI specification with all endpoints.
+  </Card>
+  <Card title="Push Notifications" icon="zap" href="/api/push-notifications" horizontal="false">
+    Set up webhooks for real-time event processing.
   </Card>
 </Columns>
-

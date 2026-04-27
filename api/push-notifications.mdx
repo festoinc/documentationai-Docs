@@ -1,0 +1,148 @@
+---
+title: Push Notifications
+description: Configure webhook endpoints for real-time event processing.
+---
+
+## Overview
+
+Push Notifications allow BookingPal to send real-time updates to your server. You configure HTTPS URLs where BookingPal will POST event data. Requires **PMS-level credentials**.
+
+<Callout kind="alert">
+Set the `reservationLink` **only after** implementing the General Reservation Notification handler, as all reservation events will be sent there immediately.
+</Callout>
+
+## Endpoints
+
+<Columns cols={2}>
+  <Card title="Set Notification Links" icon="settings" href="#set-push-notification-links" horizontal="false">
+    Configure your webhook URLs.
+  </Card>
+  <Card title="Get Notification Links" icon="eye" href="#get-notification-links" horizontal="false">
+    Retrieve current configuration.
+  </Card>
+</Columns>
+
+---
+
+## Set Push Notification Links
+
+| Field | Value |
+|---|---|
+| **Method** | `POST` |
+| **Endpoint** | `/info` |
+| **Auth** | JWT (PMS credentials) |
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/info?jwt=TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "bookLink": "https://yourserver.com/new-reservation",
+      "cancelLink": "https://yourserver.com/cancel-reservation",
+      "asyncPush": "https://yourserver.com/async-push",
+      "requestToBook": "https://yourserver.com/request-to-book",
+      "reservationLink": "https://yourserver.com/reservation"
+    }
+  }'
+```
+
+### Link Types
+
+| Field | Description |
+|---|---|
+| `reservationLink` | **Recommended.** All reservation events (new, update, cancel, request-to-book) are sent here. |
+| `bookLink` | ⚠️ Deprecated. New reservation notifications. Use `reservationLink`. |
+| `cancelLink` | ⚠️ Deprecated. Cancellation notifications. Use `reservationLink`. |
+| `asyncPush` | Asynchronous push messages: validation results, image processing, RA/LOS/fee imports. |
+| `requestToBook` | Booking request notifications (only used if `reservationLink` is not set). |
+
+---
+
+## Get Notification Links
+
+| Field | Value |
+|---|---|
+| **Method** | `GET` |
+| **Endpoint** | `/info` |
+| **Auth** | JWT (PMS credentials) |
+
+```bash
+curl -G "https://apidemo.mybookingpal.com/info?jwt=TOKEN"
+```
+
+---
+
+## Asynchronous Push Messages (Webhooks)
+
+These are **incoming** POST requests from BookingPal to your `asyncPush` endpoint. No authentication is required and no response is expected.
+
+### Validation Push
+
+Sent after the validation job completes for each property.
+
+```json
+{
+  "supplierId": 636753,
+  "type": "BP_VALIDATION",
+  "validation": [
+    { "productId": 291358, "valid": true, "validationErrors": "null" },
+    { "productId": 291356, "valid": false, "validationErrors": "noPrice;" }
+  ]
+}
+```
+
+### Image Processing Push
+
+Sent after image import/processing completes.
+
+```json
+{
+  "supplierId": 61692827,
+  "type": "PROCESSING_IMAGES",
+  "processingImage": [
+    {
+      "name": "Property Name",
+      "productId": "1235138415",
+      "images": [
+        { "success": true, "type": "IMPORT", "url": "https://...", "version": "2021-01-29T11:53:31.000+0000" }
+      ]
+    }
+  ]
+}
+```
+
+### Rates & Availability Push
+
+Sent after RA import completes.
+
+```json
+{
+  "supplierId": 636753,
+  "type": "PROCESSED_RA",
+  "rateAvailabilities": { "productId": 123456789, "success": true }
+}
+```
+
+### LOS Push
+
+Sent after LOS rates import completes.
+
+```json
+{
+  "supplierId": 636753,
+  "type": "PROCESSED_LOS",
+  "los": { "productId": 123456789, "success": true }
+}
+```
+
+### Fees & Taxes Push
+
+Sent after fees and taxes import completes.
+
+```json
+{
+  "supplierId": 636753,
+  "type": "PROCESSED_FEES_AND_TAXES",
+  "feeTax": { "productId": 123456789, "success": true }
+}
+```

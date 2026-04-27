@@ -1,0 +1,42 @@
+---
+title: Yields (Yield Management)
+description: Automated price modification rules for revenue optimization.
+---
+
+## Overview
+
+Yield Management Rules (YMR) automate price manipulations based on conditions like length of stay or early booking. Requires **PM-level credentials**.
+
+<Callout kind="alert">
+⚠️ **Do not enable the Yields API if not yet certified.** BookingPal will no longer certify new partners on this API. If your system requires base price modifications, include yields in the per-night price or consider using LOS pricing.
+</Callout>
+
+## How Yields Work
+
+The final nightly price is calculated as:
+
+<Tabs>
+  <Tab title="No YMR" icon="equal">
+    `base price per night` = `price per night`
+  </Tab>
+  <Tab title="With YMR (Amount)" icon="plus">
+    `base price per night` + `yield amount` = `price per night`
+  </Tab>
+  <Tab title="With YMR (Percent)" icon="percent">
+    `base price per night` × `(1 + yield percent)` = `price per night`
+  </Tab>
+</Tabs>
+
+## Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/yield` | Create or update YMR for a product |
+| `GET` | `/yield/{productId}` | Get YMR for a product |
+| `GET` | `/yield/{propertyManager}` | Get YMR for a PM (optional `channelAbbreviation` query param) |
+| `POST` | `/yield/{propertyManager}` | Create channel mark-up yield for a PM |
+| `DELETE` | `/yield/{propertyManager}` | Delete YMR for a PM (`channelAbbreviation` and `partyChannelMarkupId` required) |
+
+<Callout kind="info">
+The maximum allowed end date for yield rules is **3 years in the future**. If you already have a yield for a specific date and send a new one, it will be updated.
+</Callout>

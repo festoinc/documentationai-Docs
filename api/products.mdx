@@ -1,0 +1,190 @@
+---
+title: Products (Properties)
+description: Create, update, activate, and manage vacation rental properties.
+---
+
+## Overview
+
+Product endpoints allow Property Managers to manage their vacation rental properties. All endpoints require **PM-level credentials**.
+
+<Callout kind="alert">
+Each request can include only **one product**. When updating, you must include all fields from the original create request that you want to retain — any fields not included will be deleted/overwritten. The `altId` field cannot be updated.
+</Callout>
+
+## Endpoints
+
+<Columns cols={2}>
+  <Card title="Create Product" icon="plus" href="#create-product" horizontal="false">
+    Create a new property.
+  </Card>
+  <Card title="Update Product" icon="edit" href="#update-product" horizontal="false">
+    Update property details.
+  </Card>
+  <Card title="Get Product" icon="eye" href="#get-product-by-id" horizontal="false">
+    Retrieve a single property by ID.
+  </Card>
+  <Card title="List Products" icon="list" href="#get-product-list" horizontal="false">
+    List all properties with pagination.
+  </Card>
+  <Card title="Delete Product" icon="trash" href="#delete-product" horizontal="false">
+    Delete a single property.
+  </Card>
+  <Card title="Activate Products" icon="check-circle" href="#activate-list-product" horizontal="false">
+    Activate properties for distribution.
+  </Card>
+  <Card title="Deactivate Products" icon="x-circle" href="#deactivate-list-product" horizontal="false">
+    Deactivate and close calendars.
+  </Card>
+</Columns>
+
+---
+
+## Create Product
+
+| Field | Value |
+|---|---|
+| **Method** | `POST` |
+| **Endpoint** | `/product` |
+| **Auth** | JWT (PM credentials) |
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/product?jwt=TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "name": { "language": "EN", "value": "Beach Villa" },
+      "rooms": 3,
+      "bathrooms": 2,
+      "persons": 6,
+      "propertyType": "VILLA",
+      "currency": "USD",
+      "supportedLosRates": false
+    }
+  }'
+```
+
+---
+
+## Update Product
+
+| Field | Value |
+|---|---|
+| **Method** | `PUT` |
+| **Endpoint** | `/product` |
+| **Auth** | JWT (PM credentials) |
+
+Same body as Create, but must include the product `id` field. Any fields not included will be deleted/overwritten.
+
+---
+
+## Get Product by ID
+
+| Field | Value |
+|---|---|
+| **Method** | `GET` |
+| **Endpoint** | `/product/{productId}` |
+| **Auth** | JWT (PM credentials) |
+
+<ParamField path="productId" param-type="string" required="true">
+  The ID of the property in BookingPal.
+</ParamField>
+
+---
+
+## Get Product List
+
+| Field | Value |
+|---|---|
+| **Method** | `GET` |
+| **Endpoint** | `/product` |
+| **Auth** | JWT (PM credentials) |
+
+<ParamField query="page" param-type="number" required="false">
+  Page number for pagination.
+</ParamField>
+
+<ParamField query="limit" param-type="number" required="false">
+  Records per page (max 50).
+</ParamField>
+
+```bash
+curl -G "https://apidemo.mybookingpal.com/product?jwt=TOKEN" \
+  --data-urlencode "page=1" \
+  --data-urlencode "limit=25"
+```
+
+---
+
+## Delete Product
+
+| Field | Value |
+|---|---|
+| **Method** | `DELETE` |
+| **Endpoint** | `/product/{productId}` |
+| **Auth** | JWT (PM credentials) |
+
+<ParamField path="productId" param-type="string" required="true">
+  The property ID to delete.
+</ParamField>
+
+**Response:**
+
+```json
+{
+  "message": "Product with id 1235124636 was deleted",
+  "errorMessage": [],
+  "is_error": false,
+  "code": ""
+}
+```
+
+---
+
+## Activate List Product
+
+| Field | Value |
+|---|---|
+| **Method** | `POST` |
+| **Endpoint** | `/product/activation` |
+| **Auth** | JWT (PM credentials) |
+
+Properties must be activated before they can be distributed to any channel. Once activated, they are queued for internal BookingPal validation.
+
+<Callout kind="info">
+You will receive asynchronous push messages when validation is complete, indicating whether each property is valid or not.
+</Callout>
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/product/activation?jwt=TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"data": [1235124634, 1235124636]}'
+```
+
+**Response:**
+
+```json
+{
+  "message": "Property with ids [1235124634, 1235124636] will be put in Queue for validation. Please expect response over push message.",
+  "errorMessage": [],
+  "is_error": false,
+  "code": ""
+}
+```
+
+---
+
+## Deactivate List Product
+
+| Field | Value |
+|---|---|
+| **Method** | `POST` |
+| **Endpoint** | `/product/deactivation` |
+| **Auth** | JWT (PM credentials) |
+
+Deactivates properties and closes calendars on all channels where they are listed.
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/product/deactivation?jwt=TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"data": [1235124634, 1235124636]}'
+```

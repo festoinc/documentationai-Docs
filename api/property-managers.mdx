@@ -1,0 +1,276 @@
+---
+title: Property Managers
+description: Create, update, and manage Property Managers in the BookingPal platform.
+---
+
+## Overview
+
+Property Manager (PM) endpoints allow PMS providers to register and manage property managers. All endpoints in this section require **PMS-level credentials**.
+
+<Callout kind="info">
+When updating a PM, you do not need to provide all fields. However, if you include a section, all fields within that section become mandatory.
+</Callout>
+
+## Endpoints
+
+<Columns cols={2}>
+  <Card title="Create PM" icon="plus" href="#create-new-property-manager" horizontal="false">
+    Register a new Property Manager.
+  </Card>
+  <Card title="Update PM" icon="edit" href="#update-property-manager-details" horizontal="false">
+    Update PM details (partial updates allowed).
+  </Card>
+  <Card title="Get PM" icon="eye" href="#get-property-manager-detail-data" horizontal="false">
+    Retrieve PM details by ID.
+  </Card>
+  <Card title="List PMs" icon="list" href="#pm-list" horizontal="false">
+    List all PMs under your PMS.
+  </Card>
+  <Card title="Upload Host Image" icon="image" href="#upload-host-image" horizontal="false">
+    Upload a host image (max 1MB).
+  </Card>
+</Columns>
+
+---
+
+## Create New Property Manager
+
+| Field | Value |
+|---|---|
+| **Method** | `POST` |
+| **Endpoint** | `/pm` |
+| **Auth** | JWT (PMS credentials) |
+
+All fields in the request body are mandatory.
+
+<ParamField body="data.companyDetails.accountId" param-type="string" required="true">
+  Account ID.
+</ParamField>
+
+<ParamField body="data.companyDetails.companyName" param-type="string" required="true">
+  Company name.
+</ParamField>
+
+<ParamField body="data.companyDetails.language" param-type="string" required="true">
+  Language code (e.g., `"en"`).
+</ParamField>
+
+<ParamField body="data.companyDetails.fullName" param-type="string" required="true">
+  Full name of the PM.
+</ParamField>
+
+<ParamField body="data.companyDetails.companyAddress" param-type="object" required="true">
+  Address object with `country`, `state`, `streetAddress`, `city`, `zip`.
+</ParamField>
+
+<ParamField body="data.companyDetails.email" param-type="string" required="true">
+  Email address.
+</ParamField>
+
+<ParamField body="data.companyDetails.phone" param-type="object" required="true">
+  Phone object with `countryCode` and `number`.
+</ParamField>
+
+<ParamField body="data.companyDetails.currency" param-type="string" required="true">
+  Currency code (e.g., `"USD"`).
+</ParamField>
+
+<ParamField body="data.companyDetails.website" param-type="string" required="true">
+  Website URL.
+</ParamField>
+
+<ParamField body="data.companyDetails.password" param-type="string" required="true">
+  PM password.
+</ParamField>
+
+<ParamField body="data.policies" param-type="object" required="true">
+  Policies including payment policy, cancellation policy, check-in/out times, lead time.
+</ParamField>
+
+<ParamField body="data.payment" param-type="object" required="true">
+  Payment settings including payment type and credit card configuration.
+</ParamField>
+
+<ParamField body="data.isCompany" param-type="boolean" required="true">
+  Whether this is a company account.
+</ParamField>
+
+**Example Request:**
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/pm?jwt=TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "companyDetails": {
+        "accountId": "132",
+        "companyName": "Test PM",
+        "language": "en",
+        "fullName": "Test PM",
+        "companyAddress": {
+          "country": "US",
+          "state": "California",
+          "streetAddress": "123 Main St",
+          "city": "Los Angeles",
+          "zip": "90001"
+        },
+        "email": "pm@example.com",
+        "phone": { "countryCode": "1", "number": "5551234567" },
+        "currency": "USD",
+        "website": "www.example.com",
+        "password": "securePassword123"
+      },
+      "policies": {
+        "paymentPolicy": {
+          "type": "SPLIT",
+          "splitPayment": {
+            "depositType": "FLAT",
+            "value": 200,
+            "secondPaymentDays": 30
+          }
+        },
+        "cancellationPolicy": {
+          "type": "MANUAL",
+          "manualPolicy": {
+            "type": "FLAT",
+            "manualPolicies": [
+              { "chargeValue": 50, "beforeDays": 14, "cancellationFee": 1 }
+            ]
+          }
+        },
+        "feeTaxMandatory": { "isFeeMandatory": true, "isTaxMandatory": true },
+        "terms": "https://www.example.com/terms",
+        "checkInTime": "36000",
+        "checkOutTime": "57600",
+        "leadTime": 2
+      },
+      "payment": {
+        "paymentType": "MAIL_CHECK",
+        "creditCard": {
+          "creditCardType": "POST",
+          "paymentGateways": {
+            "paymentGatewaysType": "AUTHORIZE_NET",
+            "user": "api-user",
+            "secret": "api-secret"
+          },
+          "creditCardList": ["VISA", "MASTERCARD"]
+        }
+      },
+      "isCompany": true
+    }
+  }'
+```
+
+**Response:**
+
+```json
+{
+  "message": "",
+  "errorMessage": [],
+  "is_error": false,
+  "code": "",
+  "data": [{ "id": 61692801, "...": "..." }]
+}
+```
+
+---
+
+## Update Property Manager Details
+
+| Field | Value |
+|---|---|
+| **Method** | `PUT` |
+| **Endpoint** | `/pm/{id}` |
+| **Auth** | JWT (PMS credentials) |
+
+<ParamField path="id" param-type="string" required="true">
+  The ID of the Property Manager in the BookingPal system.
+</ParamField>
+
+**Partial update rules:**
+- You do **not** need to include all root-level fields
+- **CompanyDetails** — any fields can be included; none are mandatory
+- **Policies** — any fields can be included; none are mandatory
+- **PaymentPolicy** — if used, all fields inside are mandatory
+- **CancellationPolicy** — if used, all fields inside are mandatory
+- **Payment** — if used, all fields inside are mandatory
+
+---
+
+## Get Property Manager Detail Data
+
+| Field | Value |
+|---|---|
+| **Method** | `GET` |
+| **Endpoint** | `/pm/{id}` |
+| **Auth** | JWT (PMS credentials) |
+
+<ParamField path="id" param-type="string" required="true">
+  The ID of the Property Manager.
+</ParamField>
+
+<ParamField header="Content-Type" param-type="string" required="true">
+  `application/json`
+</ParamField>
+
+```bash
+curl -G "https://apidemo.mybookingpal.com/pm/61692799?jwt=TOKEN" \
+  -H "Content-Type: application/json"
+```
+
+---
+
+## PM List
+
+| Field | Value |
+|---|---|
+| **Method** | `GET` |
+| **Endpoint** | `/pmlist` |
+| **Auth** | JWT (PMS credentials) |
+
+Returns all Property Managers associated with your PMS.
+
+```bash
+curl -G "https://apidemo.mybookingpal.com/pmlist?jwt=TOKEN"
+```
+
+**Response:**
+
+```json
+{
+  "message": "",
+  "errorMessage": [],
+  "is_error": false,
+  "code": "",
+  "data": [
+    {
+      "id": 61690133,
+      "name": "Test name",
+      "extraName": "Test fullname",
+      "emailAddress": "test001@gmail.com"
+    }
+  ]
+}
+```
+
+---
+
+## Upload Host Image
+
+| Field | Value |
+|---|---|
+| **Method** | `POST` |
+| **Endpoint** | `/pm/upload-host-image` |
+| **Auth** | JWT (PMS credentials) |
+| **Content-Type** | `multipart/form-data` |
+
+Uploads an image associated with the property host. Maximum file size: **1MB**.
+
+<ParamField body="image" param-type="binary" required="true">
+  Image file (multipart form data).
+</ParamField>
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/pm/upload-host-image?jwt=TOKEN" \
+  -F "image=@/path/to/host-image.jpg"
+```

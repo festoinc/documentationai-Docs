@@ -1,54 +1,148 @@
 ---
 title: Core Concepts
-description: The basic building blocks of this starter kit.
+description: Understand the key entities and integration model of the BookingPal Supplier API.
 ---
 
 ## Overview
 
-<Callout kind="alert">
-This page is an example. Replace every concept with the real terms your product uses.
+The BookingPal Supplier API is built around several core entities. Understanding these concepts is essential for a successful integration.
+
+<Callout kind="info">
+All parameters in API requests are **case sensitive** and must be used exactly as documented.
 </Callout>
 
-## The building blocks
+## The Integration Model
+
+<Image
+  src="https://i.ibb.co/7bqPkGJ/PMS-integration-workflow.png"
+  alt="PMS Integration Workflow showing data flow between PMS, BookingPal platform, and distribution channels"
+  width="800"
+  height="400"
+/>
+
+## Key Entities
 
 <Columns cols={2}>
-  <Card title="Pages" icon="file-text">
-    Every page is an `.mdx` file. Content lives in the repo and is safe to edit.
+  <Card title="PMS (Property Management System)" icon="building" horizontal="false">
+    The system provider that integrates with BookingPal. Uses **PMS-level credentials** to manage Property Managers and configure integration settings.
   </Card>
-  <Card title="Navigation" icon="list">
-    Sidebar structure comes from `documentation.json`.
+  <Card title="Property Manager (PM)" icon="user" horizontal="false">
+    The property owner or manager. Created by the PMS and uses **PM-level credentials** to manage their properties, rates, and reservations.
   </Card>
-  <Card title="Components" icon="layout-grid">
-    Reusable blocks like Callouts, Steps, Tabs, and Cards keep pages consistent.
+  <Card title="Product (Property)" icon="home" horizontal="false">
+    A vacation rental property. Each product belongs to a PM and must be **activated** before it can be distributed to channels.
   </Card>
-  <Card title="API Reference" icon="code">
-    If you use it, the API tab reads from `openapi.yaml`.
+  <Card title="Channel" icon="globe" horizontal="false">
+    A distribution platform (Airbnb, Booking.com, etc.) where properties are listed. BookingPal acts as the middleware between PMS and channels.
   </Card>
 </Columns>
 
-## Navigation shape (sample)
+## Property Manager (PM)
 
-```json
-{
-  "tab": "Documentation",
-  "groups": [
-    {
-      "group": "Getting Started",
-      "pages": [
-        { "title": "Introduction", "path": "introduction" }
-      ]
-    }
-  ]
-}
-```
+A Property Manager is the entity that owns and manages vacation rental properties. Each PM has:
 
-## How to adapt this page
+- **Company details** — name, address, contact info, currency
+- **Policies** — payment, cancellation, check-in/out times
+- **Payment settings** — payment type, credit card processing
+- **Fee/tax mandatory flags** — whether fees and taxes are required
+
+<Callout kind="tip">
+PMs are created and managed at the PMS level. Use PMS credentials for PM CRUD operations.
+</Callout>
+
+## Product (Property) Lifecycle
 
 <Steps>
-  <Step title="Replace the terms" icon="edit">
-    Swap "Pages" and "Components" for your real domain language.
+  <Step title="Create" icon="plus">
+    Create a product with all required details (name, type, rooms, etc.) using PM credentials.
   </Step>
-  <Step title="Add your concepts" icon="plus">
-    Create a section for the ideas your users must learn first.
+  <Step title="Configure" icon="settings">
+    Set up rates, availability, fees, taxes, and images for the product.
+  </Step>
+  <Step title="Activate" icon="check-circle">
+    Activate the product. BookingPal queues it for internal validation.
+  </Step>
+  <Step title="Validate" icon="shield">
+    BookingPal validates the product asynchronously. Results are sent via push notification.
+  </Step>
+  <Step title="Distribute" icon="globe">
+    Once validated, the property is distributed to configured channels.
   </Step>
 </Steps>
+
+## Pricing Models
+
+<Tabs>
+  <Tab title="Daily Rates" icon="calendar">
+    Send per-night rates with restrictions (min/max stay, availability). Used for most channels.
+
+    - Managed via `POST /ra`
+    - Maximum end date: 3 years from current month
+    - Cannot be used for OWN properties
+  </Tab>
+  <Tab title="LOS Pricing" icon="layers">
+    Set total prices for specific lengths of stay (1–46 nights) starting from the same check-in date.
+
+    - Managed via `POST /losrates`
+    - Only available if `supportedLosRates = true` on the product
+    - Send `0.00` for stay lengths that are not allowed
+  </Tab>
+  <Tab title="Yields" icon="trending-up">
+    Automated price modifiers based on conditions (stay length, early booking, etc.).
+
+    - Managed via `POST /yield`
+    - ⚠️ No longer certifying new partners on this API
+  </Tab>
+</Tabs>
+
+## Push Notifications (Webhooks)
+
+BookingPal sends push notifications to your configured endpoints for real-time event processing:
+
+<Columns cols={2}>
+  <Card title="Reservation Push" icon="bookmark" href="/api/reservation-notifications" horizontal="false">
+    New, updated, and cancelled reservations. Sent to your `reservationLink`.
+  </Card>
+  <Card title="Async Push" icon="zap" href="/api/push-notifications" horizontal="false">
+    Validation results, image processing, RA/LOS/fee imports. Sent to your `asyncPush` endpoint.
+  </Card>
+</Columns>
+
+<Callout kind="alert">
+Set the `reservationLink` **only after** implementing the General Reservation Notification handler. Once set, all reservation events will be sent to that endpoint.
+</Callout>
+
+## Fees and Taxes
+
+Each property can have fees (cleaning, damage waiver, extra bed/person) and taxes. Key points:
+
+- **Always send the complete list** — any fees/taxes not included will be deleted
+- All taxes are expressed as a **percentage**
+- Send an **empty list** to remove all fees/taxes
+- Security deposits for Airbnb must be between **100–5,000 USD**
+
+## Validation
+
+Properties must pass BookingPal's validation before distribution:
+
+- Only **activated** properties are validated
+- Results are sent asynchronously via push messages
+- Properties with issues must be fixed and re-validated
+- A manual validation job or the daily automatic validation is required after fixes
+
+## Next Steps
+
+<Columns cols={2}>
+  <Card title="Quickstart" icon="zap" href="/quickstart" horizontal="false">
+    Make your first API call.
+  </Card>
+  <Card title="API Reference" icon="code" href="/authentication" horizontal="false">
+    Full endpoint documentation.
+  </Card>
+  <Card title="Push Notifications" icon="zap" href="/api/push-notifications" horizontal="false">
+    Configure webhook endpoints.
+  </Card>
+  <Card title="Help Center" icon="help-circle" href="/help-center" horizontal="false">
+    FAQ, troubleshooting, and guides.
+  </Card>
+</Columns>

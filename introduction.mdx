@@ -1,78 +1,87 @@
 ---
-title: Set Up Your Documentation
-description: 'A minimal, editable starting point for your own documentation site.'
+title: BookingPal Supplier API
+description: 'Complete API reference for PMS providers and Property Managers to integrate with BookingPal.'
 ---
-## Start here (5–10 minutes)
 
-1. Edit this page so it describes your product and audience.
+## Overview
 
-2. Customize your onboarding flow in the [Quickstart](/quickstart) page.
+The **BookingPal Supplier API** enables PMS (Property Management System) providers and Property Managers (PMs) to programmatically manage vacation rental properties, rates, availability, reservations, images, messaging, and more.
 
-3. Delete or rewrite any sections and pages you do not plan to use.
-
-4. Invite a teammate to review the structure and concepts starting from [Core Concepts](/concepts).
-
-<Callout kind="alert" collapsed="false">
-  This site ships with placeholder content. Edit the text, links, and examples so they match your product before sharing it with others.
+<Callout kind="info">
+All responses are returned as JSON. The maximum payload per request is **200 KB**. Successful `DELETE` requests return a `200` status with an empty response body.
 </Callout>
 
-## What you get
+## Before You Begin
 
-<Columns cols="3">
-  <Card title="Docs structure" href="/quickstart" icon="book-open" horizontal="false">
-    A clear navigation layout with starter pages you can rename or replace.
+1. Your organization must be **registered and activated** with BookingPal.
+2. You must have completed a **kick-off meeting**.
+3. The **opening questionnaire** must be filled out.
+4. You must have your **login and password** credentials.
+
+<ContactFormButton text="Contact BookingPal to Get Started" url="https://bookingpal.com/en/contact-us/" />
+
+## API Capabilities
+
+<Columns cols={3}>
+  <Card title="Property Management" icon="building" href="/api/property-managers" horizontal="false">
+    Create and manage Property Managers, their policies, and payment settings.
   </Card>
-
-  <Card title="Components" href="#try-a-few-components" icon="layout-grid" horizontal="false" target="_self">
-    Prebuilt blocks like Callouts, Steps, Tabs, and Cards to keep pages clean.
+  <Card title="Product Catalog" icon="layers" href="/api/products" horizontal="false">
+    Create, update, activate, and deactivate properties across all channels.
   </Card>
-
-  <Card title="API reference hook" href="/authentication" icon="code" horizontal="false">
-    A placeholder `openapi.yaml` you can swap with your real API spec.
+  <Card title="Rates & Availability" icon="calendar" href="/api/rates-and-availability" horizontal="false">
+    Manage daily rates, availability, restrictions, and Length-of-Stay pricing.
+  </Card>
+  <Card title="Fees & Taxes" icon="dollar-sign" href="/api/fees-and-taxes" horizontal="false">
+    Configure property-level fees and taxes with mandatory settings.
+  </Card>
+  <Card title="Reservations" icon="bookmark" href="/api/reservation-notifications" horizontal="false">
+    Receive reservation push notifications and query reservation data.
+  </Card>
+  <Card title="Webhooks" icon="zap" href="/api/push-notifications" horizontal="false">
+    Configure push notification endpoints for real-time event processing.
   </Card>
 </Columns>
 
-## Make your first edit
+## Integration Workflow
+
+<Image
+  src="https://i.ibb.co/7bqPkGJ/PMS-integration-workflow.png"
+  alt="PMS Integration Workflow Diagram showing the data flow between PMS, BookingPal, and channels"
+  width="800"
+  height="400"
+/>
+
+## Key Information
+
+<Columns cols={2}>
+  <Card title="Base URL" icon="globe" horizontal="false">
+    `https://apidemo.mybookingpal.com`
+  </Card>
+  <Card title="Auth Method" icon="lock" href="/authentication" horizontal="false">
+    JWT token passed as `jwt` query parameter.
+  </Card>
+  <Card title="Token Validity" icon="clock" horizontal="false">
+    120 minutes per session.
+  </Card>
+  <Card title="Response Format" icon="code" horizontal="false">
+    All responses are JSON objects.
+  </Card>
+</Columns>
+
+## What's Next
 
 <Steps>
-  <Step title="Rewrite this page" icon="edit" title-type="p">
-    Update the title, description, and sections in `introduction` so they reflect your product and documentation goals.
+  <Step title="Read the Quickstart" icon="zap" href="/quickstart">
+    Follow the step-by-step guide to make your first API call.
   </Step>
-
-  <Step title="Customize Quickstart" icon="zap" title-type="p">
-    Replace the steps in `quickstart` with your real onboarding flow so new readers know exactly how to get started.
+  <Step title="Set Up Authentication" icon="lock" href="/authentication">
+    Learn about JWT tokens, PMS-level vs PM-level credentials.
   </Step>
-
-  <Step title="Remove or repurpose samples" icon="trash" title-type="p">
-    Delete unused sample sections and pages, or rewrite them with your own content to keep navigation focused.
+  <Step title="Explore Core Concepts" icon="layers" href="/concepts">
+    Understand Property Managers, Products, and the integration model.
+  </Step>
+  <Step title="Browse API Reference" icon="code" href="/authentication">
+    Explore the full OpenAPI specification with all 63 endpoints.
   </Step>
 </Steps>
-
-## Try a few components
-
-You can browse the component gallery in the [Components](/components) page for ready-to-use examples of Cards, Callouts, Steps, Tabs, and more.
-
-## Continue to the rest of the sample
-
-<Columns cols="2">
-  <Card title="Quickstart" href="/quickstart" icon="zap" horizontal="false">
-    See the minimal setup flow.
-  </Card>
-
-  <Card title="Core Concepts" href="/concepts" icon="layers" horizontal="false">
-    Learn how pages, navigation, and components fit together.
-  </Card>
-
-  <Card title="Components" href="/components" icon="code" horizontal="false">
-    A small gallery of built-in components.
-  </Card>
-
-  <Card title="Authentication" href="/authentication" icon="lock" horizontal="false">
-    Example layout for an auth guide.
-  </Card>
-
-  <Card title="Help Center" href="/help-center" icon="help-circle" horizontal="false">
-    Starter FAQ, guides, and troubleshooting templates.
-  </Card>
-</Columns>
-

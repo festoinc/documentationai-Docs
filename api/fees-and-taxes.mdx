@@ -1,0 +1,153 @@
+---
+title: Fees & Taxes
+description: Configure property-level fees and taxes.
+---
+
+## Overview
+
+Set fees (cleaning, damage waiver, extra bed/person) and taxes for properties. Requires **PM-level credentials**.
+
+<Callout kind="alert">
+You must **always send the complete list** of fees and taxes. Any fees or taxes currently in the system that are not included will be **deleted**. Send an empty list to remove all.
+</Callout>
+
+<Callout kind="info">
+- All taxes are expressed as a **percentage**.
+- Security deposits for Airbnb must be between **100–5,000 USD**.
+- This is a **full update** — always send the complete list.
+</Callout>
+
+## Endpoints
+
+<Columns cols={2}>
+  <Card title="Create/Update Fees & Taxes" icon="edit" href="#create-fee-and-tax" horizontal="false">
+    Set fees and taxes for a property.
+  </Card>
+  <Card title="Get Fees & Taxes" icon="eye" href="#get-fee-and-tax-list-by-product-id" horizontal="false">
+    Retrieve fees and taxes for a property.
+  </Card>
+  <Card title="Get Mandatory Settings" icon="settings" href="#get-fee-and-tax-mandatory" horizontal="false">
+    Check fee/tax mandatory status.
+  </Card>
+  <Card title="Set Mandatory Settings" icon="toggle-left" href="#import-or-update-fee-and-tax-mandatory" horizontal="false">
+    Mark fees/taxes as mandatory or optional.
+  </Card>
+</Columns>
+
+---
+
+## Create Fee and Tax
+
+| Field | Value |
+|---|---|
+| **Method** | `POST` |
+| **Endpoint** | `/taxfee` |
+| **Auth** | JWT (PM credentials) |
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/taxfee?jwt=TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "productId": "1235124634",
+      "fees": [
+        {
+          "name": "Cleaning Fee",
+          "type": "FLAT",
+          "valueType": "PER_STAY",
+          "mandatory": true,
+          "value": 75.00,
+          "currency": "USD"
+        }
+      ],
+      "taxes": [
+        {
+          "name": "City Tax",
+          "type": "PERCENTAGE",
+          "value": 10.00,
+          "mandatory": true
+        }
+      ]
+    }
+  }'
+```
+
+---
+
+## Get Fee and Tax List by Product ID
+
+| Field | Value |
+|---|---|
+| **Method** | `GET` |
+| **Endpoint** | `/taxfee/{productId}` |
+| **Auth** | JWT (PM credentials) |
+
+<ParamField path="productId" param-type="string" required="true">
+  The ID of the property.
+</ParamField>
+
+---
+
+## Get Fee and Tax Mandatory
+
+| Field | Value |
+|---|---|
+| **Method** | `GET` |
+| **Endpoint** | `/validation-settings/get-validation` |
+| **Auth** | JWT (PM credentials) |
+
+Returns whether fees and taxes are mandatory for each property.
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "validationSettings": [
+        { "productId": 1235124634, "isFeeMandatory": false, "isTaxMandatory": false }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+## Import or Update Fee and Tax Mandatory
+
+| Field | Value |
+|---|---|
+| **Method** | `POST` |
+| **Endpoint** | `/validation-settings/import-update` |
+| **Auth** | JWT (PM credentials) |
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/validation-settings/import-update?jwt=TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "validationSettings": [
+        { "productId": 1235124634, "isFeeMandatory": false, "isTaxMandatory": false }
+      ]
+    }
+  }'
+```
+
+---
+
+## Remove Validation Settings
+
+| Field | Value |
+|---|---|
+| **Method** | `POST` |
+| **Endpoint** | `/validation-settings/removed` |
+| **Auth** | JWT (PM credentials) |
+
+Resets property-level fee and tax settings to defaults (both mandatory).
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/validation-settings/removed?jwt=TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"data": [1235124634]}'
+```

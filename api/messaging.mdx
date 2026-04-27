@@ -1,0 +1,133 @@
+---
+title: Messaging
+description: Read and respond to guest messages across channels.
+---
+
+## Overview
+
+Messaging endpoints allow PMs to read guest messages and respond. All endpoints require **PM-level credentials**.
+
+<Callout kind="info">
+Message data exists only when guests create messages via a connected channel. For testing, use the Test Message endpoints which simulate responses.
+</Callout>
+
+## Endpoints
+
+<Columns cols={2}>
+  <Card title="Get Message Threads" icon="list" href="#get-message-threads" horizontal="false">
+    Retrieve all threads or unanswered threads.
+  </Card>
+  <Card title="Get Thread Messages" icon="eye" href="#get-messages-for-specific-thread" horizontal="false">
+    Get all messages in a thread.
+  </Card>
+  <Card title="Search Messages" icon="search" href="#all-thread-search" horizontal="false">
+    Search across all message threads.
+  </Card>
+  <Card title="Post Message" icon="send" href="#post-new-message-for-specific-thread" horizontal="false">
+    Send a new message in a thread.
+  </Card>
+</Columns>
+
+---
+
+## Get Message Threads
+
+| Field | Value |
+|---|---|
+| **Method** | `GET` |
+| **Endpoint** | `/message/allthreads/{threadType}` |
+| **Auth** | JWT (PM credentials) |
+
+<ParamField path="threadType" param-type="string" required="true">
+  `all` — all threads, or `unanswered` — threads where the last message is from the guest.
+</ParamField>
+
+<ParamField query="page" param-type="integer" required="true">
+  Page number.
+</ParamField>
+
+<ParamField query="limit" param-type="integer" required="true">
+  Records per page (max 50).
+</ParamField>
+
+```bash
+curl -G "https://apidemo.mybookingpal.com/message/allthreads/all?jwt=TOKEN" \
+  --data-urlencode "page=1" \
+  --data-urlencode "limit=10"
+```
+
+---
+
+## Get Messages for Specific Thread
+
+| Field | Value |
+|---|---|
+| **Method** | `GET` |
+| **Endpoint** | `/message/specificthread/{threadId}/` |
+| **Auth** | JWT (PM credentials) |
+
+<ParamField path="threadId" param-type="string" required="true">
+  The ID of the message thread.
+</ParamField>
+
+---
+
+## All Thread Search
+
+| Field | Value |
+|---|---|
+| **Method** | `POST` |
+| **Endpoint** | `/message/allThreadsSearch` |
+| **Auth** | JWT (PM credentials) |
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/message/allThreadsSearch?jwt=TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "perPage": 20,
+      "page": 1,
+      "property": "Beach house",
+      "reservation": "232131221",
+      "pmsProductId": "43122",
+      "pmsReservationId": "32xd413"
+    }
+  }'
+```
+
+---
+
+## Post New Message for Specific Thread
+
+| Field | Value |
+|---|---|
+| **Method** | `POST` |
+| **Endpoint** | `/message` |
+| **Auth** | JWT (PM credentials) |
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/message?jwt=TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "threadId": 5656,
+      "message": "Thank you for your inquiry! We look forward to hosting you."
+    }
+  }'
+```
+
+---
+
+## Test Message Endpoints
+
+For testing purposes (same structure, simulated responses):
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/messageTest/allthreads/{threadType}` | Get test message threads |
+| `GET` | `/messageTest/specificthread/{threadId}` | Get test thread messages |
+| `POST` | `/messageTest` | Post test message |
+
+<Callout kind="tip">
+You must have at least one property to use test endpoints. Test messages are not saved.
+</Callout>

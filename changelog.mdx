@@ -1,22 +1,57 @@
 ---
-title: Sample Changelog
-description: Sample release notes you can replace with your real updates.
+title: Changelog
+description: Updates and changes to the BookingPal Supplier API.
 ---
 
-## Sample updates
+## API Updates
 
-<Callout kind="alert">
-This changelog is example content. Replace every entry with your real releases.
-</Callout>
-
-<Update label="2026-01-26" description="Sample Update" tags={["sample"]}>
+<Update label="2026-04-28" description="General Reservation Notification" tags={["feature"]}>
 ## What changed
-- Cleaned up placeholder copy across the starter kit.
-- Added clearer "sample" messaging to avoid confusion.
+- Added **General Reservation Notification** endpoint (`POST /reservation`) that consolidates new, update, and cancel reservation events.
+- Deprecated separate `POST /push` and `POST /cancel` endpoints.
+- Added `reservationLink` field to Push Notification configuration.
+- Added `x-api-key` header verification for incoming reservation pushes.
+- Added retry mechanism: up to 7 retries with exponential backoff on 504 errors.
 </Update>
 
-<Update label="2025-12-10" description="Sample Update" tags={["sample"]}>
+<Update label="2026-04-28" description="Asynchronous Push Messages" tags={["feature"]}>
 ## What changed
-- Simplified the Quickstart steps.
-- Trimmed Help Center examples.
+- Added async push notifications for **fees and taxes** imports (`POST /pushFeeTax`).
+- Added async push notifications for **LOS rates** imports (`POST /pushlos`).
+- Added async push notifications for **rates & availability** imports (`POST /pushra`).
+</Update>
+
+<Update label="2026-04-28" description="Image Management" tags={["feature", "breaking"]}>
+## What changed
+- Added `POST /image/delete` for deleting specific images (replaces deprecated `DELETE /image`).
+- Added `PUT /image` for full image update (replaces deprecated `DELETE /image/{productId}`).
+- Deprecated `DELETE /image` and `DELETE /image/{productId}` endpoints.
+</Update>
+
+<Update label="2026-04-28" description="Validation Settings" tags={["feature"]}>
+## What changed
+- Added Fee and Tax Mandatory at Property Level endpoints.
+- `GET /validation-settings/get-validation` — retrieve mandatory settings.
+- `POST /validation-settings/import-update` — set mandatory flags.
+- `POST /validation-settings/removed` — reset to defaults.
+</Update>
+
+<Update label="2026-04-28" description="Request to Book" tags={["feature"]}>
+## What changed
+- Added `POST /requestToBookTest` for testing the request-to-book flow.
+- Added decline reason codes for request-to-book answers.
+</Update>
+
+<Update label="2026-04-28" description="Messaging" tags={["feature"]}>
+## What changed
+- Added `POST /message/allThreadsSearch` for advanced message search.
+- Added test message endpoints (`/messageTest/*`) for development.
+</Update>
+
+<Update label="2026-04-28" description="Licenses" tags={["feature"]}>
+## What changed
+- Added Booking.com license management endpoints.
+- `GET /license/{productId}` — retrieve license information.
+- `PUT /license/{productId}` — create/update license information.
+- `GET /license/requirements/{productId}` — retrieve license requirements.
 </Update>

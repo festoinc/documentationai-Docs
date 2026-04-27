@@ -1,0 +1,97 @@
+---
+title: Validation
+description: Trigger property validation jobs and receive results via push notifications.
+---
+
+## Overview
+
+Validation ensures properties meet BookingPal's requirements before distribution to channels. Validation runs only on **activated** properties and results are sent asynchronously via push messages. Requires **PM-level credentials**.
+
+<Callout kind="info">
+- Properties already distributed on channels will **not revert** to an incomplete state.
+- Properties in an Incomplete state due to prior issues will **not automatically become valid** — a manual validation job is required.
+- Running validation is required to make a property ready for onboarding.
+</Callout>
+
+## Endpoints
+
+<Columns cols={2}>
+  <Card title="Validate All Properties" icon="check-circle" href="#trigger-validation-full-pm" horizontal="false">
+    Trigger validation for all activated properties.
+  </Card>
+  <Card title="Validate Specific Properties" icon="list-checks" href="#trigger-validation-list-of-properties" horizontal="false">
+    Trigger validation for a specific list of properties.
+  </Card>
+</Columns>
+
+---
+
+## Trigger Validation — Full PM
+
+| Field | Value |
+|---|---|
+| **Method** | `POST` |
+| **Endpoint** | `/validation` |
+| **Auth** | JWT (PM credentials) |
+
+Triggers validation for all activated properties belonging to the current user. Results are sent via the `asyncPush` endpoint.
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/validation?jwt=TOKEN"
+```
+
+**Response:**
+
+```json
+{
+  "message": "Your request was received and put in queue",
+  "errorMessage": [],
+  "is_error": false,
+  "code": ""
+}
+```
+
+---
+
+## Trigger Validation — List of Properties
+
+| Field | Value |
+|---|---|
+| **Method** | `POST` |
+| **Endpoint** | `/create` |
+| **Auth** | JWT (PM credentials) |
+
+Triggers validation for specific properties. Deactivated properties are skipped.
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/create?jwt=TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "productIds": [1235124634, 1235124636]
+    }
+  }'
+```
+
+## Validation Push Notification
+
+After validation completes, BookingPal sends a push notification to your `asyncPush` endpoint:
+
+```json
+{
+  "supplierId": 636753,
+  "type": "BP_VALIDATION",
+  "validation": [
+    {
+      "productId": 291358,
+      "valid": true,
+      "validationErrors": "null"
+    },
+    {
+      "productId": 291356,
+      "valid": false,
+      "validationErrors": "noPrice;"
+    }
+  ]
+}
+```

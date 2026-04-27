@@ -1,0 +1,164 @@
+---
+title: Reservation Notifications
+description: Handle reservation events — new bookings, updates, and cancellations.
+---
+
+## Overview
+
+BookingPal sends reservation notifications to your configured endpoint when bookings are created, updated, or cancelled. You can also query reservation data via GET endpoints.
+
+<Callout kind="info">
+- **GET endpoints** require PM-level credentials.
+- **Push endpoints** (incoming from BookingPal) do not require auth — verified via `x-api-key` header.
+- On a **504 Timeout**, BookingPal retries up to 7 times with exponential backoff (1s, 2s, 4s, 8s, 16s, 32s, 64s).
+- Credit card data is included only if the PMS processes payments in their system.
+</Callout>
+
+## Endpoints
+
+<Columns cols={2}>
+  <Card title="General Reservation Push" icon="zap" href="#general-reservation-notification-push" horizontal="false">
+    Handles new, update, and cancel events.
+  </Card>
+  <Card title="Get by Product" icon="eye" href="#get-reservations-by-product" horizontal="false">
+    Query reservations for a property.
+  </Card>
+  <Card title="Get by ID" icon="search" href="#get-reservation-by-id" horizontal="false">
+    Look up a specific reservation.
+  </Card>
+  <Card title="Get by PM" icon="list" href="#get-reservations-by-pm" horizontal="false">
+    List all reservations for a PM.
+  </Card>
+</Columns>
+
+---
+
+## General Reservation Notification — PUSH
+
+BookingPal sends this POST to your `reservationLink` endpoint for all reservation events.
+
+| Field | Value |
+|---|---|
+| **Method** | `POST` (incoming to your server) |
+| **Auth** | Verified via `x-api-key` header |
+
+### Action Types
+
+| Action | Description |
+|---|---|
+| `NEW` | New reservation created |
+| `UPDATE` | Reservation modified (same reservation ID) |
+| `CANCEL` | Reservation cancelled |
+| `RESERVATION_REQUEST` | Booking request awaiting approval |
+| `RESERVATION_REQUEST_VOIDED` | Booking request cancelled |
+
+### Request Body
+
+```json
+{
+  "reservationNotificationRequest": {
+    "reservationId": "3891738",
+    "productId": 1234816374,
+    "supplierId": "3731837",
+    "channelName": "Airbnb",
+    "confirmationId": "3kV1TI7p13Bs",
+    "newState": "NEW",
+    "customerName": "John Smith",
+    "fromDate": "2028-04-01",
+    "toDate": "2028-04-05",
+    "adult": 2,
+    "child": 1,
+    "email": "guestname@test.com",
+    "address": "123 Maple Street",
+    "city": "Springfield",
+    "zip": "62704",
+    "country": "USA",
+    "state": "Illinois",
+    "phone": "4234234",
+    "notes": "Late check-in requested.",
+    "creditCardType": "MASTER_CARD",
+    "creditCardNumber": "...",
+    "creditCardExpirationMonth": "12",
+    "creditCardExpirationYear": "2030",
+    "creditCardCid": "123",
+    "channelCreditCardFee": 11.43,
+    "reservationAltId": "2131231",
+    "currency": "USD"
+  },
+  "action": "NEW"
+}
+```
+
+### Expected Response
+
+```json
+{
+  "altId": "45717",
+  "is_error": false,
+  "code": "",
+  "message": "Reservation is processed."
+}
+```
+
+---
+
+## Get Reservations by Product
+
+| Field | Value |
+|---|---|
+| **Method** | `GET` |
+| **Endpoint** | `/reservation/{productId}` |
+| **Auth** | JWT (PM credentials) |
+
+<ParamField path="productId" param-type="string" required="true">
+  The ID of the property.
+</ParamField>
+
+---
+
+## Get Reservation by ID
+
+| Field | Value |
+|---|---|
+| **Method** | `GET` |
+| **Endpoint** | `/reservation/getReservation/{reservationId}` |
+| **Auth** | JWT (PM credentials) |
+
+<ParamField path="reservationId" param-type="string" required="true">
+  The ID of the reservation.
+</ParamField>
+
+---
+
+## Get Reservations by PM
+
+| Field | Value |
+|---|---|
+| **Method** | `GET` |
+| **Endpoint** | `/reservation` |
+| **Auth** | JWT (PM credentials) |
+
+<ParamField query="hours" param-type="integer" required="false">
+  Fetch reservations changed in the last X hours (max 48).
+</ParamField>
+
+<ParamField query="page" param-type="number" required="false">
+  Page number.
+</ParamField>
+
+<ParamField query="limit" param-type="number" required="false">
+  Records per page (max 50).
+</ParamField>
+
+<Callout kind="info">
+Not all information from push notifications will be included. Credit card details cannot be stored or returned via this GET API.
+</Callout>
+
+---
+
+## ⚠️ Deprecated Endpoints
+
+| Endpoint | Replacement |
+|---|---|
+| `POST /push` (New Reservation Push) | General Reservation Notification (`/reservation`) |
+| `POST /cancel` (Cancellation Push) | General Reservation Notification (`/reservation`) |

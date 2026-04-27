@@ -1,0 +1,75 @@
+---
+title: LOS Pricing
+description: Length-of-Stay pricing for flexible rate management.
+---
+
+## Overview
+
+Length-of-Stay (LOS) pricing allows PMs to set total prices for different stay durations starting from the same check-in date, as an alternative to daily rates. Requires **PM-level credentials**.
+
+<Callout kind="info">
+- LOS values from **1 to 46 days**.
+- Only available if `supportedLosRates = true` is set for the product.
+- Send `0.00` for a stay length that is not allowed.
+- Omitting a stay length is treated the same as `0.00`.
+- Use `maxGuests` field for guest-based pricing tiers.
+</Callout>
+
+## Endpoints
+
+<Columns cols={2}>
+  <Card title="Create/Update LOS" icon="edit" href="#create-and-update-los-pricing" horizontal="false">
+    Set LOS rates for a property.
+  </Card>
+  <Card title="Get LOS Rates" icon="eye" href="#get-los-prices-by-product-id" horizontal="false">
+    Retrieve LOS rates for a property.
+  </Card>
+</Columns>
+
+---
+
+## Create and Update LOS Pricing
+
+| Field | Value |
+|---|---|
+| **Method** | `POST` |
+| **Endpoint** | `/losrates` |
+| **Auth** | JWT (PM credentials) |
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/losrates?jwt=TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "productId": "1235124634",
+      "losRates": [
+        {
+          "checkInDate": "2026-06-01T00:00:00.000+0000",
+          "currency": "USD",
+          "maxGuests": 4,
+          "losValue": [100, 180, 250, 300, 350, 0, 0, 450, 500, 550, 600, 650, 700, 750]
+        }
+      ]
+    }
+  }'
+```
+
+The `losValue` array contains total rates for stays of 1, 2, 3, ... up to 46 nights.
+
+---
+
+## Get LOS Prices by Product ID
+
+| Field | Value |
+|---|---|
+| **Method** | `GET` |
+| **Endpoint** | `/losrates/{productId}` |
+| **Auth** | JWT (PM credentials) |
+
+<ParamField path="productId" param-type="string" required="true">
+  The ID of the property.
+</ParamField>
+
+```bash
+curl -G "https://apidemo.mybookingpal.com/losrates/1235124634?jwt=TOKEN"
+```

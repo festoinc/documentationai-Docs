@@ -1,57 +1,155 @@
 ---
-title: Authentication (Sample)
-description: Sample guidance for authentication and OpenAPI usage.
+title: Authentication
+description: JWT-based authentication for the BookingPal Supplier API.
 ---
 
 ## Overview
 
-This is sample content. Replace tokens, URLs, headers, and flows with your real authentication requirements.
+The BookingPal Supplier API uses **JWT (JSON Web Token)** authentication. You obtain a token via the Login endpoint and include it as a query parameter in every request.
 
 <Callout kind="info">
-
-This site ships with placeholder content for authentication. Update this page and `openapi.yaml` to match your real API before sharing with users.
-
+All API calls (except incoming push/webhook endpoints) require a valid JWT token. Tokens expire after **120 minutes**.
 </Callout>
 
-This API uses OpenAPI to describe endpoints, parameters, and responses. The reference is generated from `openapi.yaml`, so keep that file up to date as your API evolves.
+## How Authentication Works
 
-## Authentication
+<Steps>
+  <Step title="Login" icon="key">
+    Call `GET /authc/login` with your `username` (email) and `password` as query parameters. The response contains a JWT token.
+  </Step>
+  <Step title="Use the token" icon="send">
+    Include the token as a `jwt` query parameter in every subsequent API request.
+  </Step>
+  <Step title="Refresh when expired" icon="refresh-cw">
+    Tokens are valid for 120 minutes. Call the Login endpoint again to obtain a new token before the current one expires.
+  </Step>
+</Steps>
 
-Use a bearer token in the `Authorization` header for authenticated requests. Replace the base URL and token with values for your own API.
+## Login Endpoint
 
-```bash
-curl https://api.example.com/v1/example \
-  -H "Authorization: Bearer YOUR_TOKEN"
-```
+| Field | Value |
+|---|---|
+| **Method** | `GET` |
+| **URL** | `/authc/login` |
+| **Auth** | None (credentials in query params) |
 
-<ParamField header="Authorization" param-type="string" required="true">
-  `Bearer YOUR_TOKEN`
+<ParamField query="username" param-type="string" required="true">
+  Your account email address (PMS or PM).
 </ParamField>
 
-## Keep OpenAPI in sync
+<ParamField query="password" param-type="string" required="true">
+  Your account password.
+</ParamField>
 
-Define your authentication and base settings in `openapi.yaml` so the API Reference stays accurate and consistent.
+**Example Request:**
 
-At a minimum, you should:
+```bash
+curl -G "https://apidemo.mybookingpal.com/authc/login" \
+  --data-urlencode "username=your-email@example.com" \
+  --data-urlencode "password=your-password"
+```
 
-- Define one or more security schemes that describe how clients authenticate (for example, bearer token, API key in a header, or other scheme).
-- Reference those security schemes on operations that require authentication so they are clearly marked as secured.
-- Set the correct base URL and any required global headers (for example, versioning or tenant headers) so example requests are copy-pasteable.
+**Example Response:**
 
-When your real authentication flow changes (for example, new header names, token formats, or additional requirements), update `openapi.yaml`. The generated API Reference will then reflect your current auth model without needing to edit each endpoint page by hand.
+```json
+{
+  "token": "d5d308244d9eb48a/e9073f6d-85a1-49b8-a799-19c57b66fb24",
+  "partyId": 61692799,
+  "organizationId": 61690135,
+  "name": "Riverwalk Inn",
+  "currency": "USD",
+  "supplierId": 61692799,
+  "is_error": false
+}
+```
 
-## Using the API reference
+## Using the Token
 
-Use the API Reference to explore endpoints, required parameters, and example responses. When you change authentication headers or base URLs, update `openapi.yaml` so the generated reference matches what your clients should use.
+Pass the token as a `jwt` query parameter in every request:
 
-## Common mistakes
+```bash
+curl -G "https://apidemo.mybookingpal.com/pmlist" \
+  --data-urlencode "jwt=YOUR_TOKEN_HERE"
+```
+
+<Callout kind="tip">
+Implement token caching in your application. Store the token and its expiration time. Re-authenticate only when the token is about to expire.
+</Callout>
+
+## Token Types
+
+<Tabs>
+  <Tab title="PMS-Level Token" icon="building">
+    Obtained using **PMS credentials**. Used for:
+
+    - Creating and managing Property Managers
+    - Listing Property Managers
+    - Configuring push notification endpoints
+    - Retrieving channel configuration
+
+    ```bash
+    # PMS-level login
+    curl -G "https://apidemo.mybookingpal.com/authc/login" \
+      --data-urlencode "username=pms@yourcompany.com" \
+      --data-urlencode "password=pms-password"
+    ```
+  </Tab>
+  <Tab title="PM-Level Token" icon="user">
+    Obtained using **PM credentials**. Used for:
+
+    - Managing products (properties)
+    - Setting rates, availability, and LOS pricing
+    - Managing images, fees, and taxes
+    - Handling reservations and messaging
+
+    ```bash
+    # PM-level login
+    curl -G "https://apidemo.mybookingpal.com/authc/login" \
+      --data-urlencode "username=pm-email@example.com" \
+      --data-urlencode "password=pm-password"
+    ```
+  </Tab>
+</Tabs>
+
+## Webhook Authentication (Incoming)
+
+Push notification endpoints (webhooks) sent **from** BookingPal to **your** server use a different verification mechanism:
+
+<Columns cols={2}>
+  <Card title="Reservation Push" icon="shield" horizontal="false">
+    Verified via the `x-api-key` header included in the request. Confirm the notification is from BookingPal.
+  </Card>
+  <Card title="Async Push" icon="zap" horizontal="false">
+    No authentication. These are informational notifications sent to your `asyncPush` endpoint.
+  </Card>
+</Columns>
+
+## Error Handling
+
+| Status Code | Description |
+|---|---|
+| `422` | Username or password is empty |
+| `401` | Invalid credentials or expired token |
+| `403` | Insufficient permissions for the requested operation |
 
 <Expandable title="Why am I getting a 401?" default-open="false">
 
 Verify that:
 
-- The token is valid and not expired.
-- The token is sent in the `Authorization` header.
-- The header value includes the `Bearer` prefix and a space before the token.
+- The token is valid and has not expired (120-minute lifetime).
+- The token is passed as the `jwt` **query parameter**, not in headers.
+- You are using the correct credential type (PMS vs PM) for the endpoint.
+- The URL is correctly encoded when passing the token.
+
+</Expandable>
+
+<Expandable title="How do I handle token expiration gracefully?" default-open="false">
+
+Recommended approach:
+
+1. Store the token and the timestamp when it was obtained.
+2. Before each API call, check if the token is older than ~110 minutes.
+3. If so, re-authenticate to get a fresh token.
+4. If an API call returns 401, automatically re-authenticate and retry the request once.
 
 </Expandable>

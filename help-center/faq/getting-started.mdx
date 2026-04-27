@@ -1,20 +1,81 @@
 ---
-title: Where does this documentation come from?
-description: Clarify that this site is a sample starter kit.
+title: Frequently Asked Questions
+description: Common questions about the BookingPal Supplier API.
 ---
-## Short answer
 
-This is sample content bundled with the starter kit. It is not your product documentation yet.
+## Authentication
 
-## What to do next
+<Expandable title="How long are JWT tokens valid?" default-open="false">
+Tokens are valid for **120 minutes**. You should implement token caching and re-authenticate before the token expires.
+</Expandable>
 
-- Replace each page with your real information.
+<Expandable title="What is the difference between PMS-level and PM-level tokens?" default-open="false">
+- **PMS-level token**: Used for managing Property Managers, push notification configuration, and channel configuration.
+- **PM-level token**: Used for managing properties, rates, availability, images, fees, taxes, reservations, and messaging.
+</Expandable>
 
-- Update navigation labels from dashboard editor or from `documentation.json`.
+<Expandable title="How do I pass the token in requests?" default-open="false">
+Pass the JWT token as a `jwt` **query parameter** in every request URL:
+```
+https://apidemo.mybookingpal.com/pmlist?jwt=YOUR_TOKEN
+```
+</Expandable>
 
-- Remove sections you do not plan to maintain.
+## Products & Properties
 
-<Callout kind="info" collapsed="false">
-  If you are unsure where a page comes from, look for its `.mdx` file in this repo and edit it directly.
-</Callout>
+<Expandable title="Can I create multiple products in a single request?" default-open="false">
+No, each request can include only **one product**. Send separate requests for each property.
+</Expandable>
 
+<Expandable title="What happens when I update a product?" default-open="false">
+You must include all fields from the original create request that you want to retain. Any fields not included in the update request will be **deleted/overwritten**. The `altId` field cannot be updated.
+</Expandable>
+
+<Expandable title="When can a property be distributed to channels?" default-open="false">
+A property must be **activated** and **validated** before it can be distributed. Activation triggers a validation job. Results are sent via push notification.
+</Expandable>
+
+## Rates & Availability
+
+<Expandable title="What is the maximum date range for rates?" default-open="false">
+The maximum end date is **3 years** from the first date of the current month. Dates beyond this will be accepted but dropped by the system.
+</Expandable>
+
+<Expandable title="Do I need to send all data for every update?" default-open="false">
+For the **first push**, send all data for the property. For subsequent updates, send only the dates you want to change — other dates will remain unchanged.
+</Expandable>
+
+<Expandable title="What is the difference between daily rates and LOS pricing?" default-open="false">
+- **Daily rates** (`/ra`): Per-night pricing with availability and restrictions.
+- **LOS pricing** (`/losrates`): Total prices for specific stay lengths (1–46 nights). Only available if `supportedLosRates = true`.
+</Expandable>
+
+## Fees & Taxes
+
+<Expandable title="Do I need to send all fees and taxes every time?" default-open="false">
+Yes, this is a **full update**. Always send the complete list of fees and taxes. Any existing ones not included will be deleted. Send an empty list to remove all.
+</Expandable>
+
+<Expandable title="How are taxes expressed?" default-open="false">
+All taxes in the BookingPal system are expressed as a **percentage**.
+</Expandable>
+
+## Push Notifications
+
+<Expandable title="What happens if my server returns a 504 error?" default-open="false">
+BookingPal retries up to **7 times** using exponential backoff: 1s, 2s, 4s, 8s, 16s, 32s, 64s.
+</Expandable>
+
+<Expandable title="Should I use reservationLink or bookLink/cancelLink?" default-open="false">
+Use `reservationLink` — it handles all reservation events (new, update, cancel, request-to-book). The separate `bookLink` and `cancelLink` are deprecated.
+</Expandable>
+
+## Images
+
+<Expandable title="How long does it take for images to be processed?" default-open="false">
+Image operations are processed asynchronously via a cron job. Processing time depends on the queue size. You will receive a push notification when processing is complete.
+</Expandable>
+
+<Expandable title="Can I use redirect URLs for images?" default-open="false">
+No. Use direct image URLs. Redirects may prevent images from being imported.
+</Expandable>

@@ -1,0 +1,102 @@
+---
+title: Request to Book
+description: Handle booking requests that require PM approval.
+---
+
+## Overview
+
+Some channels (e.g., Airbnb) support a "Request to Book" flow where guests submit booking requests that PMs must accept or decline. BookingPal pushes these requests to your server.
+
+## Endpoints
+
+<Columns cols={2}>
+  <Card title="Test Request-to-Book" icon="flask" href="#request-to-book-test" horizontal="false">
+    Simulate booking requests for testing.
+  </Card>
+  <Card title="Incoming Request — PUSH" icon="zap" href="#request-to-book-push" horizontal="false">
+    BookingPal sends booking requests to your server.
+  </Card>
+  <Card title="Accept or Decline" icon="check-square" href="#request-to-book-answer-from-pms" horizontal="false">
+    Respond to booking requests.
+  </Card>
+</Columns>
+
+---
+
+## Request to Book — Test
+
+| Field | Value |
+|---|---|
+| **Method** | `POST` |
+| **Endpoint** | `/requestToBookTest` |
+| **Auth** | JWT (PM credentials) |
+
+Since booking requests cannot be created directly in the test environment, this endpoint simulates a booking request push for a given property.
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/requestToBookTest?jwt=TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "action": "RESERVATION_REQUEST_VOIDED",
+      "productId": 1235124634
+    }
+  }'
+```
+
+---
+
+## Request to Book — PUSH (Incoming)
+
+| Field | Value |
+|---|---|
+| **Method** | `POST` (incoming to your server) |
+| **Endpoint** | `/requestToBook` (your configured URL) |
+| **Auth** | None |
+
+BookingPal sends this POST when a booking request arrives from a channel. If `reservationLink` is set, the notification goes there instead.
+
+---
+
+## Request to Book — Answer from PMS
+
+| Field | Value |
+|---|---|
+| **Method** | `POST` |
+| **Endpoint** | `/` |
+| **Auth** | JWT (PM credentials) |
+
+Accept or decline a booking request.
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/?jwt=TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "requestToBookType": "ACCEPT",
+      "reservationId": 1235124634
+    }
+  }'
+```
+
+### Response Types
+
+| Value | Description |
+|---|---|
+| `ACCEPT` | Accept the booking request |
+| `DENY` | Decline the booking request |
+
+### Decline Reason Types
+
+When declining, you can specify a reason:
+
+| Reason | Description |
+|---|---|
+| `DATES_NOT_AVAILABLE` | Dates are no longer available |
+| `MINIMUM_STAY_NOT_MET` | Stay is too short |
+| `MAXIMUM_STAY_NOT_MET` | Stay is too long |
+| (others) | Additional reason codes available |
+
+<ParamField body="data.declineMessageToGuest" param-type="string" required="false">
+  Custom message to send to the guest explaining the decline.
+</ParamField>

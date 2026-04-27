@@ -1,12 +1,12 @@
 ---
-title: Components (Sample)
-description: A small showcase of the built-in MDX components with usage guidelines.
+title: Components
+description: MDX components available for documentation authoring.
 ---
 
 ## Quick component tour
 
 <Callout kind="info">
-These are example components from Documentation.AI. Use them to make pages easier to scan.
+These are built-in Documentation.AI components used throughout this documentation. Use them to keep pages consistent and easy to scan.
 </Callout>
 
 <Columns cols={3}>
@@ -21,72 +21,13 @@ These are example components from Documentation.AI. Use them to make pages easie
   </Card>
 </Columns>
 
-### Callout: usage tips
+### Usage in this API Documentation
 
-**When to use**
+Throughout these docs you'll see these components used for:
 
-- Highlight important warnings or constraints that affect success
-- Call out tips that save time or prevent common mistakes
-- Emphasize prerequisites, permissions, or irreversible actions
-
-**When not to use**
-
-- For every minor detail; overuse makes real warnings easy to ignore
-- As a replacement for clear prose and headings
-- To hide critical blocking information at the bottom of a long page
-
-## Steps (sample)
-
-<Steps>
-  <Step title="Add a heading" icon="type">
-    Start each page with a clear, short title.
-  </Step>
-  <Step title="Explain the goal" icon="target">
-    Tell readers what they will achieve.
-  </Step>
-  <Step title="Link to next steps" icon="arrow-right">
-    Point to the next page they should read.
-  </Step>
-</Steps>
-
-### Steps: usage tips
-
-**When to use**
-
-- Readers must follow actions in a specific order
-- You describe tasks that can be completed in one sitting
-- You want to separate conceptual explanation from hands-on actions
-
-**When not to use**
-
-- For unordered checklists where sequence does not matter
-- To document background concepts or architecture
-- For long, branching workflows that need their own dedicated guide
-
-## Tabs (sample)
-
-<Tabs>
-  <Tab title="CLI" icon="terminal">
-    ```bash
-    docs init my-project
-    docs dev
-    ```
-  </Tab>
-  <Tab title="UI" icon="mouse-pointer">
-    Open the editor, choose a page, and start writing.
-  </Tab>
-</Tabs>
-
-### Tabs: usage tips
-
-**When to use**
-
-- You show the same idea in multiple languages or platforms
-- You provide alternate setup paths, such as CLI versus UI
-- You want to keep short variants in one compact section
-
-**When not to use**
-
-- When one variant is strongly recommended over the others
-- For long, independent flows that deserve separate pages
-- When content differs so much that readers must read all variants anyway
+- **Callouts** — highlighting important API constraints, deprecations, and tips
+- **Steps** — walking through integration flows and setup procedures
+- **Tabs** — showing PMS vs PM token types, or daily rates vs LOS pricing
+- **Cards** — linking to related API sections and endpoints
+- **Expandable** — FAQ answers and troubleshooting details
+- **ParamField** — documenting API parameters with type, location, and required status

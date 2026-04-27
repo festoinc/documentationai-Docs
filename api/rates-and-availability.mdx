@@ -1,0 +1,99 @@
+---
+title: Rates & Availability
+description: Manage daily rates, availability, and restrictions for your properties.
+---
+
+## Overview
+
+Rates and Availability endpoints allow PMs to set per-night pricing and availability for their properties. Requires **PM-level credentials**.
+
+<Callout kind="info">
+- **Create and Update** work the same way: existing data is updated, new data is created.
+- For **subsequent updates**, send only the dates you want to change.
+- For the **first data push**, send all data for the property in a single request.
+- **Maximum end date**: 3 years from the first date of the current month.
+- This API **cannot be used for OWN properties**.
+</Callout>
+
+## Endpoints
+
+<Columns cols={2}>
+  <Card title="Create/Update RA" icon="edit" href="#create-and-update-rates-and-availability" horizontal="false">
+    Set daily rates and availability.
+  </Card>
+  <Card title="Get RA" icon="eye" href="#get-rates-and-availability-by-product-id" horizontal="false">
+    Retrieve rates and availability for a property.
+  </Card>
+</Columns>
+
+---
+
+## Create and Update Rates and Availability
+
+| Field | Value |
+|---|---|
+| **Method** | `POST` |
+| **Endpoint** | `/ra` |
+| **Auth** | JWT (PM credentials) |
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/ra?jwt=TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "productId": "1235124634",
+      "ratesAvailabilities": [
+        {
+          "date": "2026-06-01",
+          "availableCount": 1,
+          "minStay": 3,
+          "maxStay": 14,
+          "rate": 150.00,
+          "currency": "USD"
+        },
+        {
+          "date": "2026-06-02",
+          "availableCount": 1,
+          "minStay": 3,
+          "maxStay": 14,
+          "rate": 150.00,
+          "currency": "USD"
+        }
+      ]
+    }
+  }'
+```
+
+**Response:**
+
+```json
+{
+  "message": "Your request was received and put in queue",
+  "errorMessage": [],
+  "is_error": false,
+  "code": ""
+}
+```
+
+---
+
+## Get Rates and Availability by Product ID
+
+| Field | Value |
+|---|---|
+| **Method** | `GET` |
+| **Endpoint** | `/ra/{productId}` |
+| **Auth** | JWT (PM credentials) |
+
+<ParamField path="productId" param-type="string" required="true">
+  The ID of the property.
+</ParamField>
+
+<ParamField header="Content-Type" param-type="string" required="true">
+  `application/json`
+</ParamField>
+
+```bash
+curl -G "https://apidemo.mybookingpal.com/ra/1235124634?jwt=TOKEN" \
+  -H "Content-Type: application/json"
+```

@@ -1,20 +1,113 @@
 ---
-title: Create Your First Doc Page
-description: A short guide to adding a new page to this starter kit.
+title: PMS Integration Guide
+description: Step-by-step guide for integrating your PMS with BookingPal.
 ---
+
 ## Overview
 
-Use this guide as a sample for your real setup instructions.
+This guide walks you through the complete PMS integration process with BookingPal.
 
-## Steps
+<Callout kind="alert">
+Before starting, ensure your organization is registered and activated with BookingPal, and you have completed the kick-off meeting and opening questionnaire.
+</Callout>
+
+## Phase 1: Authentication & Setup
 
 <Steps>
-  <Step title="Create a new file" icon="file-plus" title-type="p">
-    Add a page using + and start with a title and short description.
+  <Step title="Implement Login" icon="key">
+    Implement the `GET /authc/login` endpoint call with your PMS credentials. Store the returned JWT token with a 120-minute expiry. Implement automatic re-authentication.
   </Step>
-
-  <Step title="Write the first section" icon="edit" title-type="p">
-    Add a simple header and a few sentences users can scan quickly.
+  <Step title="Implement token management" icon="shield">
+    Cache tokens and refresh before expiry. Pass the token as `jwt` query parameter in all requests.
+  </Step>
+  <Step title="Verify connectivity" icon="check-circle">
+    Call `GET /pmlist` to verify your credentials work and retrieve existing PMs.
   </Step>
 </Steps>
 
+## Phase 2: Property Manager Setup
+
+<Steps>
+  <Step title="Create PMs" icon="user-plus">
+    Use `POST /pm` to register Property Managers with all required fields: company details, policies, and payment settings.
+  </Step>
+  <Step title="Configure push endpoints" icon="zap">
+    Use `POST /info` to set your webhook URLs for reservation notifications and async push messages.
+  </Step>
+  <Step title="Check channel configuration" icon="globe">
+    Call `GET /channel-configuration` to see available channels and their capabilities.
+  </Step>
+</Steps>
+
+## Phase 3: Property Management
+
+<Steps>
+  <Step title="Create products" icon="plus">
+    Use `POST /product` to create properties for each PM. Include name, type, rooms, bathrooms, persons, and currency.
+  </Step>
+  <Step title="Add images" icon="image">
+    Use `POST /image` or `PUT /image` to upload property photos. First image becomes the Main Image.
+  </Step>
+  <Step title="Set fees and taxes" icon="dollar-sign">
+    Use `POST /taxfee` to configure fees and taxes. Always send the complete list.
+  </Step>
+</Steps>
+
+## Phase 4: Rates & Availability
+
+<Steps>
+  <Step title="Push initial rates" icon="calendar">
+    Send all rates and availability data for each property via `POST /ra`. First push must include complete data.
+  </Step>
+  <Step title="Implement async push handler" icon="zap">
+    Build an endpoint to receive `PROCESSED_RA` push notifications and confirm successful imports.
+  </Step>
+  <Step title="Set up incremental updates" icon="refresh-cw">
+    For subsequent updates, send only changed dates. Set up a sync schedule (e.g., daily).
+  </Step>
+</Steps>
+
+## Phase 5: Reservations
+
+<Steps>
+  <Step title="Implement reservation push handler" icon="bookmark">
+    Build an endpoint to receive General Reservation Notifications. Verify the `x-api-key` header. Handle `NEW`, `UPDATE`, `CANCEL`, and `RESERVATION_REQUEST` actions.
+  </Step>
+  <Step title="Set reservationLink" icon="settings">
+    Configure the `reservationLink` in push notification settings. Only do this after implementing the handler.
+  </Step>
+  <Step title="Implement request-to-book flow" icon="check-square">
+    If needed, implement accept/decline functionality via the Request-to-Book endpoints.
+  </Step>
+</Steps>
+
+## Phase 6: Activation & Distribution
+
+<Steps>
+  <Step title="Activate properties" icon="check-circle">
+    Use `POST /product/activation` to activate properties. This queues them for validation.
+  </Step>
+  <Step title="Handle validation results" icon="shield">
+    Monitor `BP_VALIDATION` push notifications. Fix any issues reported in `validationErrors` and re-validate.
+  </Step>
+  <Step title="Connect to channels" icon="globe">
+    Once validated, properties can be distributed to configured channels via the BookingPal platform.
+  </Step>
+</Steps>
+
+## Best Practices
+
+<Columns cols={2}>
+  <Card title="Error Handling" icon="alert-triangle" horizontal="false">
+    Always check `is_error` in responses. Implement retry logic for transient errors.
+  </Card>
+  <Card title="Rate Limiting" icon="clock" horizontal="false">
+    Batch changes and send all updates in a single request per operation type.
+  </Card>
+  <Card title="Data Consistency" icon="database" horizontal="false">
+    For fees/taxes and image updates, always send the complete list to avoid data loss.
+  </Card>
+  <Card title="Monitoring" icon="activity" horizontal="false">
+    Log all push notifications. Set up alerts for failed imports or validation errors.
+  </Card>
+</Columns>

@@ -1,0 +1,76 @@
+---
+title: Channel Configuration
+description: Retrieve channel configuration and capabilities for your account.
+---
+
+## Overview
+
+The Channel Configuration endpoint returns the list of distribution channels available to your account along with their capabilities and requirements. Requires **PMS-level credentials**.
+
+## Get Channel Configuration
+
+| Field | Value |
+|---|---|
+| **Method** | `GET` |
+| **Endpoint** | `/channel-configuration` |
+| **Auth** | JWT (PMS credentials) |
+
+```bash
+curl -G "https://apidemo.mybookingpal.com/channel-configuration?jwt=TOKEN"
+```
+
+**Response:**
+
+```json
+{
+  "message": "",
+  "errorMessage": [],
+  "code": "",
+  "data": [
+    {
+      "name": "Booking.com",
+      "abbreviation": "BKG",
+      "logo": "https://s3.amazonaws.com/.../bookingWizard.png",
+      "state": "VISIBLE",
+      "supportValidation": true,
+      "supportCreate": true,
+      "supportConnect": true,
+      "supportOpenClose": true,
+      "supportStaticUpdate": true,
+      "supportImageUpdate": true,
+      "supportDynamicUpdate": true,
+      "supportSynchronization": false,
+      "supportCreateChannelAccount": true,
+      "supportAuthorization": true,
+      "supportGather": true,
+      "supportChannelCancellationPolicy": true,
+      "supportCancelFormPm": false,
+      "supportModificationFromPm": false,
+      "bookingType": "Instant",
+      "ratesAndAvailabilityMapping": "MapToRatePlan",
+      "acceptsPropertyType": "Both",
+      "nativePropertyType": "Hotels",
+      "minimumProperties": 0
+    }
+  ],
+  "is_error": false
+}
+```
+
+## Channel Capabilities Reference
+
+| Field | Description |
+|---|---|
+| `supportValidation` | Channel supports property validation |
+| `supportCreate` | Properties can be created on this channel |
+| `supportConnect` | Properties can be connected |
+| `supportOpenClose` | Calendars can be opened/closed |
+| `supportStaticUpdate` | Supports static (manual) rate updates |
+| `supportDynamicUpdate` | Supports dynamic (real-time) rate updates |
+| `supportImageUpdate` | Images can be synced |
+| `supportSynchronization` | Supports full synchronization |
+| `supportAuthorization` | Channel requires authorization |
+| `supportGather` | Can gather reservations from this channel |
+| `bookingType` | `Instant` or `Request` |
+| `ratesAndAvailabilityMapping` | How rates map to the channel |
+| `acceptsPropertyType` | Property types accepted (`Both`, `Hotels`, `VacationRentals`) |

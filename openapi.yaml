@@ -1,192 +1,1479 @@
 openapi: '3.0.0'
 info:
   version: 1.0.0
-  title: Sample API
+  title: BookingPal Supplier API
   description: >
-    This is a sample OpenAPI file included with the starter kit.
-
-    Replace this entire file with your own OpenAPI specification that fully
-    describes your API, including your endpoints, schemas, authentication,
-    and error handling. Use this sample only as a structural reference, not
-    as a starting point for a production API definition.
+    Complete REST API for PMS providers and Property Managers to integrate
+    with the BookingPal vacation rental distribution platform.
   license:
-    name: MIT
+    name: Proprietary
 servers:
-  - url: https://api.example.com/v1
+  - url: https://apidemo.mybookingpal.com
+    description: Production API
+
+security:
+  - jwtQuery: []
+
 paths:
-  /projects:
+  /authc/login:
     get:
-      summary: List all projects
-      operationId: listProjects
+      summary: Login
+      description: Authenticate and obtain a JWT token. Tokens are valid for 120 minutes.
+      operationId: login
+      security: []
       parameters:
-        - name: limit
+        - name: username
           in: query
-          description: How many items to return at one time (max 100)
-          required: false
-          schema:
-            type: integer
-            format: int32
-      responses:
-        200:
-          description: An paged array of projects
-          headers:
-            x-next:
-              description: A link to the next page of responses
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Projects'
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-    post:
-      summary: Create project
-      operationId: createProjects
-      responses:
-        201:
-          description: Null response
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  /projects/{projectId}:
-    get:
-      summary: Get project info
-      operationId: showProjectById
-      parameters:
-        - name: projectId
-          in: path
           required: true
-          description: The id of the project to retrieve
+          description: Account email address (PMS or PM)
+          schema:
+            type: string
+        - name: password
+          in: query
+          required: true
+          description: Account password
           schema:
             type: string
       responses:
-        200:
-          description: Expected response to a valid request
+        '200':
+          description: Successful login
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Projects'
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  /documents:
-    get:
-      summary: List all documents
-      operationId: listDocuments
-      parameters:
-        - name: limit
-          in: query
-          description: How many items to return at one time (max 100)
-          required: false
-          schema:
-            type: integer
-            format: int32
-      responses:
-        200:
-          description: An paged array of documents
-          headers:
-            x-next:
-              description: A link to the next page of responses
-              schema:
-                type: string
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Documents'
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/LoginResponse'
+        '422':
+          description: Username or password is empty
+
+  /pm:
     post:
-      summary: Create document
-      operationId: createDocuments
+      summary: Create Property Manager
+      description: Register a new Property Manager. All fields are mandatory.
+      operationId: createPM
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePMRequest'
       responses:
-        201:
-          description: Null response
-        default:
-          description: unexpected error
+        '200':
+          description: PM created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
-  /documents/{docId}:
-    get:
-      summary: Get document info
-      operationId: showDocumentById
+                $ref: '#/components/schemas/PMResponse'
+
+  /pm/{id}:
+    put:
+      summary: Update Property Manager
+      description: Update PM details. Partial updates allowed per section.
+      operationId: updatePM
       parameters:
-        - name: docId
-          in: path
+        - $ref: '#/components/parameters/PmId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePMRequest'
+      responses:
+        '200':
+          description: PM updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PMResponse'
+    get:
+      summary: Get Property Manager
+      description: Retrieve PM details by ID.
+      operationId: getPM
+      parameters:
+        - $ref: '#/components/parameters/PmId'
+        - name: Content-Type
+          in: header
           required: true
-          description: The id of the document to retrieve
           schema:
             type: string
       responses:
-        200:
-          description: Expected response to a valid request
+        '200':
+          description: PM details
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Documents'
-        default:
-          description: unexpected error
+                $ref: '#/components/schemas/PMResponse'
+
+  /pmlist:
+    get:
+      summary: List Property Managers
+      description: Get all PMs associated with your PMS.
+      operationId: listPMs
+      responses:
+        '200':
+          description: List of PMs
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/PMListResponse'
+
+  /pm/upload-host-image:
+    post:
+      summary: Upload Host Image
+      description: Upload a host image (max 1MB).
+      operationId: uploadHostImage
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Image uploaded
+
+  /product:
+    post:
+      summary: Create Product
+      description: Create a new property.
+      operationId: createProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductRequest'
+      responses:
+        '200':
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+    get:
+      summary: List Products
+      description: Get all properties with pagination.
+      operationId: listProducts
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: number
+        - name: limit
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: List of products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+    put:
+      summary: Update Product
+      description: Update product details. Must include all fields to retain.
+      operationId: updateProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductRequest'
+      responses:
+        '200':
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+    delete:
+      summary: Delete List of Products
+      description: Delete a list of products.
+      operationId: deleteListProducts
+      responses:
+        '200':
+          description: Products deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /product/{productId}:
+    get:
+      summary: Get Product by ID
+      operationId: getProduct
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductResponse'
+    delete:
+      summary: Delete Product
+      operationId: deleteProduct
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Product deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /product/activation:
+    post:
+      summary: Activate Products
+      description: Activate properties for distribution. Queues validation.
+      operationId: activateProducts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductIdsRequest'
+      responses:
+        '200':
+          description: Products queued for validation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /product/deactivation:
+    post:
+      summary: Deactivate Products
+      description: Deactivate properties and close calendars.
+      operationId: deactivateProducts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductIdsRequest'
+      responses:
+        '200':
+          description: Products deactivated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /ra:
+    post:
+      summary: Create/Update Rates & Availability
+      description: Set daily rates, availability, and restrictions.
+      operationId: createUpdateRA
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RARequest'
+      responses:
+        '200':
+          description: Request queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /ra/{productId}:
+    get:
+      summary: Get Rates & Availability
+      operationId: getRA
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+        - name: Content-Type
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Rates and availability data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RAResponse'
+
+  /losrates:
+    post:
+      summary: Create/Update LOS Pricing
+      description: Set Length-of-Stay rates (1-46 nights).
+      operationId: createUpdateLOS
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LOSRequest'
+      responses:
+        '200':
+          description: Request queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /losrates/{productId}:
+    get:
+      summary: Get LOS Pricing
+      operationId: getLOS
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: LOS rates data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LOSResponse'
+
+  /taxfee:
+    post:
+      summary: Create/Update Fees & Taxes
+      description: Set fees and taxes. Always send complete list.
+      operationId: createUpdateTaxFee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaxFeeRequest'
+      responses:
+        '200':
+          description: Fees and taxes updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaxFeeResponse'
+
+  /taxfee/{productId}:
+    get:
+      summary: Get Fees & Taxes
+      operationId: getTaxFee
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Fees and taxes data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaxFeeResponse'
+
+  /validation-settings/get-validation:
+    get:
+      summary: Get Fee/Tax Mandatory Settings
+      operationId: getValidationSettings
+      responses:
+        '200':
+          description: Validation settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationSettingsResponse'
+
+  /validation-settings/import-update:
+    post:
+      summary: Set Fee/Tax Mandatory Settings
+      operationId: setValidationSettings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidationSettingsRequest'
+      responses:
+        '200':
+          description: Settings updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /validation-settings/removed:
+    post:
+      summary: Remove Validation Settings
+      description: Reset to defaults (fees and taxes mandatory).
+      operationId: removeValidationSettings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductIdsRequest'
+      responses:
+        '200':
+          description: Settings removed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /image:
+    post:
+      summary: Add Image
+      description: Add a single image to a property.
+      operationId: addImage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddImageRequest'
+      responses:
+        '200':
+          description: Image queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+    put:
+      summary: Full Image Update
+      description: Replace all images for a property.
+      operationId: fullImageUpdate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FullImageUpdateRequest'
+      responses:
+        '200':
+          description: Images queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+    delete:
+      summary: Delete List of Images (Deprecated)
+      description: Deprecated. Use POST /image/delete instead.
+      operationId: deleteListImagesDeprecated
+      deprecated: true
+      responses:
+        '200':
+          description: Images queued for deletion
+
+  /image/{productId}:
+    get:
+      summary: Get Images
+      operationId: getImages
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Image list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageListResponse'
+    delete:
+      summary: Delete All Images (Deprecated)
+      description: Deprecated. Use PUT /image instead.
+      operationId: deleteAllImagesDeprecated
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+        - name: Content-Type
+          in: header
+          required: true
+          schema:
+            type: string
+      deprecated: true
+      responses:
+        '200':
+          description: Images queued for deletion
+
+  /image/delete:
+    post:
+      summary: Delete List of Images
+      description: Delete specific images from a property.
+      operationId: deleteImages
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteImagesRequest'
+      responses:
+        '200':
+          description: Images queued for deletion
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /yield:
+    post:
+      summary: Create/Update Yield Management Rules
+      operationId: createYMR
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: YMR created/updated
+
+  /yield/{productId}:
+    get:
+      summary: Get YMR by Product
+      operationId: getYMR
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Yield rules
+
+  /yield/{propertyManager}:
+    get:
+      summary: Get YMR by Property Manager
+      operationId: getYMRByPM
+      parameters:
+        - name: propertyManager
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: channelAbbreviation
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Yield rules
+    post:
+      summary: Create Channel Mark-up Yield
+      operationId: createYieldByPM
+      parameters:
+        - name: propertyManager
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Yield created
+    delete:
+      summary: Delete YMR by Property Manager
+      operationId: deleteYMR
+      parameters:
+        - name: propertyManager
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: channelAbbreviation
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: partyChannelMarkupId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: YMR deleted
+
+  /validation:
+    post:
+      summary: Trigger Validation (Full PM)
+      description: Trigger validation for all activated properties.
+      operationId: triggerValidationFull
+      responses:
+        '200':
+          description: Validation queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /create:
+    post:
+      summary: Trigger Validation (Property List)
+      description: Trigger validation for specific properties.
+      operationId: triggerValidationList
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidationListRequest'
+      responses:
+        '200':
+          description: Validation queued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /info:
+    post:
+      summary: Set Push Notification Links
+      operationId: setPushLinks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushLinksRequest'
+      responses:
+        '200':
+          description: Links configured
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PushLinksResponse'
+    get:
+      summary: Get Push Notification Links
+      operationId: getPushLinks
+      responses:
+        '200':
+          description: Current links
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PushLinksResponse'
+
+  /reservation:
+    post:
+      summary: General Reservation Notification (PUSH)
+      description: Incoming webhook from BookingPal for reservation events.
+      operationId: reservationPush
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationPushRequest'
+      responses:
+        '200':
+          description: Accepted
+
+  /reservation/{productId}:
+    get:
+      summary: Get Reservations by Product
+      operationId: getReservationsByProduct
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: Reservation list
+
+  /reservation/getReservation/{reservationId}:
+    get:
+      summary: Get Reservation by ID
+      operationId: getReservationById
+      parameters:
+        - name: reservationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Reservation details
+
+  /push:
+    post:
+      summary: New Reservation Push (Deprecated)
+      description: Deprecated. Use General Reservation Notification.
+      operationId: newReservationPushDeprecated
+      security: []
+      deprecated: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Accepted
+
+  /cancel:
+    post:
+      summary: Cancellation Push (Deprecated)
+      description: Deprecated. Use General Reservation Notification.
+      operationId: cancelPushDeprecated
+      security: []
+      deprecated: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Accepted
+
+  /requestToBookTest:
+    post:
+      summary: Test Request-to-Book
+      description: Simulate a booking request push for testing.
+      operationId: testRequestToBook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestToBookTestRequest'
+      responses:
+        '200':
+          description: Test accepted
+
+  /requestToBook:
+    post:
+      summary: Request-to-Book Push (Incoming)
+      description: Incoming booking request from BookingPal.
+      operationId: requestToBookPush
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Accepted
+
+  /message/allthreads/{threadType}:
+    get:
+      summary: Get Message Threads
+      operationId: getMessageThreads
+      parameters:
+        - name: threadType
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Message threads
+
+  /message/specificthread/{threadId}:
+    get:
+      summary: Get Thread Messages
+      operationId: getThreadMessages
+      parameters:
+        - name: threadId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Messages
+
+  /message/allThreadsSearch:
+    post:
+      summary: Search Messages
+      operationId: searchMessages
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Search results
+
+  /message:
+    post:
+      summary: Post New Message
+      operationId: postMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Message queued
+
+  /messageTest/allthreads/{threadType}:
+    get:
+      summary: Get Test Message Threads
+      operationId: getTestMessageThreads
+      parameters:
+        - name: threadType
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Test threads
+
+  /messageTest/specificthread/{threadId}:
+    get:
+      summary: Get Test Thread Messages
+      operationId: getTestThreadMessages
+      parameters:
+        - name: threadId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Test messages
+
+  /messageTest:
+    post:
+      summary: Post Test Message
+      operationId: postTestMessage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Message queued
+
+  /license/{productId}:
+    get:
+      summary: Get License Info
+      operationId: getLicense
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: License data
+    put:
+      summary: Create/Update License Info
+      operationId: updateLicense
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: License updated
+
+  /license/requirements/{productId}:
+    get:
+      summary: Get License Requirements
+      operationId: getLicenseRequirements
+      parameters:
+        - $ref: '#/components/parameters/ProductId'
+      responses:
+        '200':
+          description: License requirements
+
+  /channel-configuration:
+    get:
+      summary: Get Channel Configuration
+      description: Retrieve available channels and their capabilities.
+      operationId: getChannelConfig
+      responses:
+        '200':
+          description: Channel list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChannelConfigResponse'
+
 components:
+  securitySchemes:
+    jwtQuery:
+      type: apiKey
+      in: query
+      name: jwt
+      description: JWT token obtained from /authc/login
+
+  parameters:
+    PmId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Property Manager ID
+
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Property ID in BookingPal
+
   schemas:
-    Project:
-      required:
-        - id
-        - name
+    LoginResponse:
+      type: object
       properties:
-        id:
+        token:
+          type: string
+        partyId:
           type: integer
-          format: int64
+        organizationId:
+          type: integer
         name:
           type: string
-        description:
+        currency:
           type: string
-    Projects:
-      type: array
-      items:
-        $ref: '#/components/schemas/Project'
-    Document:
-      required:
-        - id
-        - title
-      properties:
-        id:
+        supplierId:
           type: integer
-          format: int64
-        title:
-          type: string
-        content:
-          type: string
-    Documents:
-      type: array
-      items:
-        $ref: '#/components/schemas/Document'
-    Error:
-      required:
-        - code
-        - message
-      properties:
-        code:
-          type: integer
-          format: int32
+        is_error:
+          type: boolean
         message:
           type: string
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        errorMessage:
+          type: array
+          items:
+            type: string
+        is_error:
+          type: boolean
+        code:
+          type: string
+
+    ProductIdsRequest:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            type: integer
+
+    PushLinksRequest:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            bookLink:
+              type: string
+            cancelLink:
+              type: string
+            asyncPush:
+              type: string
+            requestToBook:
+              type: string
+            reservationLink:
+              type: string
+
+    PushLinksResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        errorMessage:
+          type: array
+          items:
+            type: string
+        is_error:
+          type: boolean
+        code:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PushLinksData'
+
+    PushLinksData:
+      type: object
+      properties:
+        bookLink:
+          type: string
+        cancelLink:
+          type: string
+        asyncPush:
+          type: string
+        requestToBook:
+          type: string
+        reservationLink:
+          type: string
+
+    CreatePMRequest:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            companyDetails:
+              type: object
+            policies:
+              type: object
+            payment:
+              type: object
+            isCompany:
+              type: boolean
+
+    PMResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        errorMessage:
+          type: array
+          items:
+            type: string
+        is_error:
+          type: boolean
+        code:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+
+    PMListResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        errorMessage:
+          type: array
+          items:
+            type: string
+        is_error:
+          type: boolean
+        code:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              extraName:
+                type: string
+              emailAddress:
+                type: string
+
+    ProductRequest:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            name:
+              type: object
+            rooms:
+              type: integer
+            bathrooms:
+              type: integer
+            persons:
+              type: integer
+            propertyType:
+              type: string
+            currency:
+              type: string
+            supportedLosRates:
+              type: boolean
+
+    ProductResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        errorMessage:
+          type: array
+          items:
+            type: string
+        is_error:
+          type: boolean
+        code:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+
+    RARequest:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            productId:
+              type: string
+            ratesAvailabilities:
+              type: array
+              items:
+                type: object
+                properties:
+                  date:
+                    type: string
+                  availableCount:
+                    type: integer
+                  minStay:
+                    type: integer
+                  maxStay:
+                    type: integer
+                  rate:
+                    type: number
+                  currency:
+                    type: string
+
+    RAResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        errorMessage:
+          type: array
+          items:
+            type: string
+        is_error:
+          type: boolean
+        code:
+          type: string
+
+    LOSRequest:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            productId:
+              type: string
+            losRates:
+              type: array
+              items:
+                type: object
+                properties:
+                  checkInDate:
+                    type: string
+                  currency:
+                    type: string
+                  maxGuests:
+                    type: integer
+                  losValue:
+                    type: array
+                    items:
+                      type: number
+
+    LOSResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        errorMessage:
+          type: array
+          items:
+            type: string
+        is_error:
+          type: boolean
+        code:
+          type: string
+
+    TaxFeeRequest:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            productId:
+              type: string
+            fees:
+              type: array
+              items:
+                type: object
+            taxes:
+              type: array
+              items:
+                type: object
+
+    TaxFeeResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          type: object
+
+    ValidationSettingsRequest:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            validationSettings:
+              type: array
+              items:
+                type: object
+                properties:
+                  productId:
+                    type: integer
+                  isFeeMandatory:
+                    type: boolean
+                  isTaxMandatory:
+                    type: boolean
+
+    ValidationSettingsResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+
+    ValidationListRequest:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            productIds:
+              type: array
+              items:
+                type: integer
+
+    AddImageRequest:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            productId:
+              type: integer
+            image:
+              type: object
+              properties:
+                url:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: integer
+
+    FullImageUpdateRequest:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            productId:
+              type: integer
+            images:
+              type: array
+              items:
+                type: object
+                properties:
+                  url:
+                    type: string
+                  tags:
+                    type: array
+                    items:
+                      type: integer
+
+    DeleteImagesRequest:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            productId:
+              type: integer
+            images:
+              type: array
+              items:
+                type: object
+                properties:
+                  url:
+                    type: string
+
+    ImageListResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              productId:
+                type: integer
+              images:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    url:
+                      type: string
+                    tags:
+                      type: array
+                      items:
+                        type: integer
+                    urlMbp:
+                      type: string
+                    sort:
+                      type: integer
+
+    ReservationPushRequest:
+      type: object
+      properties:
+        reservationNotificationRequest:
+          type: object
+          properties:
+            reservationId:
+              type: string
+            productId:
+              type: integer
+            supplierId:
+              type: string
+            channelName:
+              type: string
+            confirmationId:
+              type: string
+            newState:
+              type: string
+            customerName:
+              type: string
+            fromDate:
+              type: string
+            toDate:
+              type: string
+            adult:
+              type: integer
+            child:
+              type: integer
+            email:
+              type: string
+            address:
+              type: string
+            city:
+              type: string
+            zip:
+              type: string
+            country:
+              type: string
+            state:
+              type: string
+            phone:
+              type: string
+            notes:
+              type: string
+            creditCardType:
+              type: string
+            creditCardNumber:
+              type: string
+            creditCardExpirationMonth:
+              type: string
+            creditCardExpirationYear:
+              type: string
+            creditCardCid:
+              type: string
+            currency:
+              type: string
+        action:
+          type: string
+          enum: [NEW, UPDATE, CANCEL, RESERVATION_REQUEST, RESERVATION_REQUEST_VOIDED]
+
+    RequestToBookTestRequest:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            action:
+              type: string
+            productId:
+              type: integer
+
+    ChannelConfigResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              abbreviation:
+                type: string
+              logo:
+                type: string
+              state:
+                type: string
+              supportValidation:
+                type: boolean
+              supportCreate:
+                type: boolean
+              supportConnect:
+                type: boolean
+              supportOpenClose:
+                type: boolean
+              supportStaticUpdate:
+                type: boolean
+              supportImageUpdate:
+                type: boolean
+              supportDynamicUpdate:
+                type: boolean
+              supportSynchronization:
+                type: boolean
+              bookingType:
+                type: string
+              ratesAndAvailabilityMapping:
+                type: string
+              acceptsPropertyType:
+                type: string
+              nativePropertyType:
+                type: string
+        is_error:
+          type: boolean

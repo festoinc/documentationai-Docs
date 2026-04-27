@@ -1,0 +1,87 @@
+---
+title: Licenses (Booking.com)
+description: Manage property license information for the Booking.com channel.
+---
+
+## Overview
+
+License endpoints allow PMs to manage property license information required by the Booking.com channel. All endpoints require **PM-level credentials**.
+
+## Endpoints
+
+<Columns cols={2}>
+  <Card title="Get License Info" icon="eye" href="#get-license-information" horizontal="false">
+    Retrieve license information for a property.
+  </Card>
+  <Card title="Set License Info" icon="edit" href="#create-or-update-license-information" horizontal="false">
+    Create or update license information.
+  </Card>
+  <Card title="Get License Requirements" icon="list-checks" href="#get-license-requirements" horizontal="false">
+    Retrieve license requirements for a property.
+  </Card>
+</Columns>
+
+---
+
+## Get License Information
+
+| Field | Value |
+|---|---|
+| **Method** | `GET` |
+| **Endpoint** | `/license/{productId}` |
+| **Auth** | JWT (PM credentials) |
+
+<ParamField path="productId" param-type="string" required="true">
+  The ID of the property.
+</ParamField>
+
+```bash
+curl -G "https://apidemo.mybookingpal.com/license/61692799?jwt=TOKEN"
+```
+
+---
+
+## Create or Update License Information
+
+| Field | Value |
+|---|---|
+| **Method** | `PUT` |
+| **Endpoint** | `/license/{productId}` |
+| **Auth** | JWT (PM credentials) |
+
+License details must comply with the requirements obtained from the GET `/license/requirements/{productId}` endpoint.
+
+<ParamField path="productId" param-type="string" required="true">
+  The ID of the property.
+</ParamField>
+
+```bash
+curl -X PUT "https://apidemo.mybookingpal.com/license/61692799?jwt=TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": [
+      {
+        "contentData": [],
+        "variantId": "license-variant-id"
+      }
+    ]
+  }'
+```
+
+---
+
+## Get License Requirements
+
+| Field | Value |
+|---|---|
+| **Method** | `GET` |
+| **Endpoint** | `/license/requirements/{productId}` |
+| **Auth** | JWT (PM credentials) |
+
+<ParamField path="productId" param-type="string" required="true">
+  The ID of the property.
+</ParamField>
+
+```bash
+curl -G "https://apidemo.mybookingpal.com/license/requirements/61692799?jwt=TOKEN"
+```

@@ -1,52 +1,61 @@
 ---
-title: Notice
-description: Clear guidance that this site is a starter template.
+title: Important Notes
+description: Key information and prerequisites for the BookingPal Supplier API integration.
 ---
 
-## This is a sample
+## Prerequisites
 
-<Callout kind="alert" collapsed="false">
-This site ships with placeholder content. Review and replace it with your real documentation before sharing with customers.
-</Callout>
-
-## What is safe to change
-
-You can edit any page content, rename sections, and update navigation structure. If you do not need the API Reference or Help Center, you can also remove those tabs from `documentation.json`.
-
-<Columns cols="2">
-  <Card title="Page content" icon="file-text" horizontal="false">
-    Edit any `.mdx` file in this repo.
-  </Card>
-
-  <Card title="Navigation" icon="list" horizontal="false">
-    Update labels, order, and visible tabs in `documentation.json`.
-  </Card>
-
-  <Card title="API Reference" icon="code" horizontal="false">
-    Swap `openapi.yaml` with your own spec, or remove the API Reference tab from `documentation.json` if you do not need it.
-  </Card>
-
-  <Card title="Help Center" icon="help-circle" horizontal="false">
-    Replace FAQs, guides, and troubleshooting with your real support content, or remove the Help Center tab from `documentation.json` if it is not part of your docs.
-  </Card>
-</Columns>
-
-## Recommended first changes
+Before using the BookingPal Supplier API, ensure the following:
 
 <Steps>
-  <Step title="Rename pages" icon="edit" title-type="p">
-    Update page titles and descriptions to match your product.
+  <Step title="Registration" icon="check-circle">
+    Your organization is registered and activated with BookingPal.
   </Step>
-
-  <Step title="Replace sample links" icon="link" title-type="p">
-    Remove any placeholder URLs and add your own.
+  <Step title="Kick-off Meeting" icon="users">
+    You have completed a kick-off meeting with the BookingPal team.
   </Step>
-
-  <Step title="Remove unused tabs and sections" icon="settings" title-type="p">
-    Open `documentation.json` and remove entries for tabs or sections you do not plan to use, such as the API Reference or Help Center, without deleting any files.
+  <Step title="Questionnaire" icon="file-text">
+    The opening questionnaire has been filled out and submitted.
   </Step>
-
-  <Step title="Remove unused pages" icon="trash" title-type="p">
-    Delete any `.mdx` pages you do not plan to maintain so the sidebar only shows relevant content.
+  <Step title="Credentials" icon="key">
+    You have your login email and password.
   </Step>
 </Steps>
+
+## General Guidelines
+
+<Callout kind="alert" collapsed="false">
+All parameters in API requests are **case sensitive** and must be used exactly as documented.
+</Callout>
+
+### Payload Limits
+- Maximum payload per request: **200 KB**
+- Responses are returned as JSON
+- Successful `DELETE` requests return `200` with an empty response body
+
+### Authentication
+- Tokens are valid for **120 minutes**
+- Two token types: **PMS-level** and **PM-level**
+- Pass the token as a `jwt` **query parameter** in every request
+- Incoming push/webhook endpoints use `x-api-key` header for verification
+
+### Rate Limits
+- Send all changed data for rates/availability in **one request**
+- Image operations are processed asynchronously via a **cron job**
+- Use unique URLs and filenames for images
+
+### Data Constraints
+- Maximum end date for rates/availability/yields: **3 years** from the current month
+- LOS pricing: values from **1 to 46 days**
+- Security deposits for Airbnb: **100–5,000 USD**
+- Fees and taxes: always send the **complete list** (full update)
+- Product updates: include all fields you want to **retain**
+
+### Push Notification Retries
+- On **504 Timeout** errors, BookingPal retries up to **7 times** with exponential backoff (1s, 2s, 4s, 8s, 16s, 32s, 64s)
+
+### Deprecations
+- `POST /push` (New Reservation) → Use General Reservation Notification
+- `POST /cancel` (Cancellation) → Use General Reservation Notification
+- `DELETE /image` → Use `POST /image/delete`
+- `DELETE /image/{productId}` → Use `PUT /image`

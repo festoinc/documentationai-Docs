@@ -1,0 +1,149 @@
+---
+title: Images
+description: Manage property images — add, update, retrieve, and delete.
+---
+
+## Overview
+
+Image endpoints allow PMs to manage property photos. All endpoints require **PM-level credentials**.
+
+<Callout kind="alert">
+Image uploads and deletes are processed asynchronously via a cron job. Changes are not instant — processing time depends on the queue. Always use **unique URLs and filenames** for each image.
+</Callout>
+
+<Callout kind="info">
+Do not use URLs that redirect to another link — images might not be imported.
+</Callout>
+
+## Endpoints
+
+<Columns cols={2}>
+  <Card title="Add Image" icon="plus" href="#add-image" horizontal="false">
+    Add a single image to a property.
+  </Card>
+  <Card title="Full Image Update" icon="refresh-cw" href="#full-image-update" horizontal="false">
+    Replace all images (full update).
+  </Card>
+  <Card title="Get Images" icon="eye" href="#get-image-list-by-product-id" horizontal="false">
+    Retrieve all images for a property.
+  </Card>
+  <Card title="Delete Images" icon="trash" href="#delete-list-of-images" horizontal="false">
+    Delete specific images from a property.
+  </Card>
+</Columns>
+
+---
+
+## Add Image
+
+| Field | Value |
+|---|---|
+| **Method** | `POST` |
+| **Endpoint** | `/image` |
+| **Auth** | JWT (PM credentials) |
+
+Adds a single image to the **end** of the image list. The first image ever sent becomes the **Main Image**.
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/image?jwt=TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "productId": 1234879670,
+      "image": {
+        "url": "http://www.example.com/property/photo1.jpg",
+        "tags": [1, 2, 3]
+      }
+    }
+  }'
+```
+
+---
+
+## Full Image Update
+
+| Field | Value |
+|---|---|
+| **Method** | `PUT` |
+| **Endpoint** | `/image` |
+| **Auth** | JWT (PM credentials) |
+
+Replaces **all** images for a property. Images are sorted in the order sent. The first image becomes the Main Image. Any existing images not included will be **deleted**.
+
+```bash
+curl -X PUT "https://apidemo.mybookingpal.com/image?jwt=TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "productId": 1234893572,
+      "images": [
+        { "url": "http://example.com/img1.jpg", "tags": [1, 2, 3] },
+        { "url": "http://example.com/img2.jpg", "tags": [4, 5, 6] }
+      ]
+    }
+  }'
+```
+
+---
+
+## Get Image List by Product ID
+
+| Field | Value |
+|---|---|
+| **Method** | `GET` |
+| **Endpoint** | `/image/{productId}` |
+| **Auth** | JWT (PM credentials) |
+
+<ParamField path="productId" param-type="string" required="true">
+  The ID of the property.
+</ParamField>
+
+```bash
+curl -G "https://apidemo.mybookingpal.com/image/1235124634?jwt=TOKEN"
+```
+
+**Response:**
+
+```json
+{
+  "data": [
+    {
+      "productId": 1235124634,
+      "images": [
+        {
+          "url": "http://example.com/image1.jpg",
+          "tags": [4, 5, 6],
+          "urlMbp": "https://s3.amazonaws.com/.../image1.jpg",
+          "sort": 1
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+## Delete List of Images
+
+| Field | Value |
+|---|---|
+| **Method** | `POST` |
+| **Endpoint** | `/image/delete` |
+| **Auth** | JWT (PM credentials) |
+
+Delete one or more specific images from a property.
+
+```bash
+curl -X POST "https://apidemo.mybookingpal.com/image/delete?jwt=TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data": {
+      "productId": 1234864758,
+      "images": [
+        { "url": "https://example.com/image1.jpg" },
+        { "url": "https://example.com/image2.jpg" }
+      ]
+    }
+  }'
+```

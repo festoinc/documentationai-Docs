@@ -1,26 +1,113 @@
 ---
-title: Page Missing in Sidebar
-description: Fix a page that does not appear in navigation.
+title: Common API Errors
+description: Troubleshoot frequent issues with the BookingPal Supplier API.
 ---
-## Symptoms
 
-- A new page file exists but does not show up in the sidebar.
+## Authentication Errors
 
-- Clicking a nav item shows a 404.
-
-## Fix
+### 422 — Username or password is empty
 
 <Steps>
-  <Step title="Confirm the file name" icon="file-text" title-type="p">
-    Ensure the file exists.
+  <Step title="Verify credentials" icon="key">
+    Ensure both `username` and `password` query parameters are included in the login request.
   </Step>
-
-  <Step title="Update navigation" icon="settings" title-type="p">
-    Add or fix the matching `path` in `documentation.json` or from navigation menu.
-  </Step>
-
-  <Step title="Publish" icon="refresh-cw" title-type="p">
-    Publish so changes take effect.
+  <Step title="Check encoding" icon="code">
+    Ensure credentials are properly URL-encoded in the request.
   </Step>
 </Steps>
 
+```bash
+# Correct
+curl -G "https://apidemo.mybookingpal.com/authc/login" \
+  --data-urlencode "username=your-email@example.com" \
+  --data-urlencode "password=your-password"
+
+# Incorrect — missing credentials
+curl -G "https://apidemo.mybookingpal.com/authc/login"
+```
+
+### 401 — Unauthorized
+
+<Steps>
+  <Step title="Check token validity" icon="clock">
+    Tokens expire after 120 minutes. Re-authenticate to get a new token.
+  </Step>
+  <Step title="Verify token parameter" icon="search">
+    Ensure the token is passed as `jwt` query parameter, not in headers.
+  </Step>
+  <Step title="Check credential type" icon="users">
+    Ensure you're using the correct credential type (PMS vs PM) for the endpoint.
+  </Step>
+</Steps>
+
+---
+
+## Validation Errors
+
+### Property not validating
+
+<Steps>
+  <Step title="Check activation status" icon="check-circle">
+    Only **activated** properties are validated. Ensure the property has been activated via `POST /product/activation`.
+  </Step>
+  <Step title="Review validation errors" icon="alert-triangle">
+    Check the `asyncPush` notification for `validationErrors`. Common issues: missing rates, missing fees/taxes, incomplete property data.
+  </Step>
+  <Step title="Re-validate after fixes" icon="refresh-cw">
+    Properties in Incomplete state do not auto-recover. Trigger a new validation job after fixing issues.
+  </Step>
+</Steps>
+
+---
+
+## Rate & Availability Errors
+
+### Rates not appearing on channels
+
+<Steps>
+  <Step title="Check async push result" icon="zap">
+    Verify the `PROCESSED_RA` push notification shows `"success": true`.
+  </Step>
+  <Step title="Verify date range" icon="calendar">
+    Ensure dates are within the 3-year maximum range.
+  </Step>
+  <Step title="Check property status" icon="check-circle">
+    Property must be activated and validated.
+  </Step>
+</Steps>
+
+---
+
+## Image Errors
+
+### Images not importing
+
+<Steps>
+  <Step title="Check URLs" icon="link">
+    Ensure URLs are direct links (no redirects). Use unique URLs and filenames.
+  </Step>
+  <Step title="Check async push" icon="zap">
+    Wait for the `PROCESSING_IMAGES` push notification and check `success` field for each image.
+  </Step>
+  <Step title="Check file size" icon="image">
+    For host images, maximum file size is 1MB.
+  </Step>
+</Steps>
+
+---
+
+## Reservation Errors
+
+### Not receiving reservation push notifications
+
+<Steps>
+  <Step title="Check push notification links" icon="settings">
+    Ensure `reservationLink` (or `bookLink`/`cancelLink`) is configured via `POST /info`.
+  </Step>
+  <Step title="Verify endpoint accessibility" icon="globe">
+    Ensure your server is publicly accessible and accepts POST requests.
+  </Step>
+  <Step title="Return correct response" icon="check-square">
+    Ensure your endpoint returns `{"is_error": false, "message": "Reservation is processed."}`.
+  </Step>
+</Steps>

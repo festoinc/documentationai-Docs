@@ -1,11 +1,11 @@
 {
-  "name": "Starter Kit",
+  "name": "BookingPal Supplier API",
   "colors": {
     "light": {
-      "brand": "#F97316"
+      "brand": "#2563EB"
     },
     "dark": {
-      "brand": "#FDBA74"
+      "brand": "#60A5FA"
     }
   },
   "navigation": {
@@ -15,7 +15,7 @@
         "icon": "book",
         "groups": [
           {
-            "group": "Start Here",
+            "group": "Getting Started",
             "icon": "rocket",
             "pages": [
               {
@@ -29,45 +29,106 @@
                 "icon": "zap"
               },
               {
-                "title": "Components",
-                "path": "components",
-                "icon": "code"
+                "title": "Authentication",
+                "path": "authentication",
+                "icon": "lock"
+              },
+              {
+                "title": "Core Concepts",
+                "path": "concepts",
+                "icon": "layers"
               }
             ]
           },
           {
-            "group": "Components",
-            "icon": "layers",
+            "group": "API Reference",
+            "icon": "code",
             "pages": [
               {
+                "title": "Property Managers",
+                "path": "api/property-managers",
+                "icon": "building"
+              },
+              {
+                "title": "Products",
+                "path": "api/products",
+                "icon": "home"
+              },
+              {
+                "title": "Rates & Availability",
+                "path": "api/rates-and-availability",
+                "icon": "calendar"
+              },
+              {
+                "title": "LOS Pricing",
+                "path": "api/los-pricing",
+                "icon": "layers"
+              },
+              {
+                "title": "Fees & Taxes",
+                "path": "api/fees-and-taxes",
+                "icon": "dollar-sign"
+              },
+              {
                 "title": "Images",
-                "path": "components/images",
+                "path": "api/images",
                 "icon": "image"
               },
               {
-                "title": "Cards",
-                "path": "components/cards",
-                "icon": "square"
+                "title": "Yields",
+                "path": "api/yields",
+                "icon": "trending-up"
               },
               {
-                "title": "Code",
-                "path": "components/code",
-                "icon": "code"
+                "title": "Validation",
+                "path": "api/validation",
+                "icon": "shield"
               },
               {
-                "title": "Callouts",
-                "path": "components/callouts",
-                "icon": "message-square"
+                "title": "Push Notifications",
+                "path": "api/push-notifications",
+                "icon": "zap"
               },
               {
-                "title": "Steps",
-                "path": "components/steps",
-                "icon": "list-ordered"
+                "title": "Reservations",
+                "path": "api/reservation-notifications",
+                "icon": "bookmark"
               },
               {
-                "title": "Tabs",
-                "path": "components/tabs",
-                "icon": "columns"
+                "title": "Request to Book",
+                "path": "api/request-to-book",
+                "icon": "check-square"
+              },
+              {
+                "title": "Messaging",
+                "path": "api/messaging",
+                "icon": "message-circle"
+              },
+              {
+                "title": "Licenses",
+                "path": "api/licenses",
+                "icon": "file-text"
+              },
+              {
+                "title": "Configuration",
+                "path": "api/configuration",
+                "icon": "settings"
+              }
+            ]
+          },
+          {
+            "group": "Important Notes",
+            "icon": "alert-triangle",
+            "pages": [
+              {
+                "title": "Guidelines & Limits",
+                "path": "notice",
+                "icon": "info"
+              },
+              {
+                "title": "Components",
+                "path": "components",
+                "icon": "layout-grid"
               }
             ]
           }
@@ -89,7 +150,7 @@
             ]
           },
           {
-            "group": "Sample Endpoints",
+            "group": "OpenAPI Specification",
             "openapi": "openapi.yaml"
           }
         ]
@@ -109,7 +170,7 @@
             "expandable": false,
             "pages": [
               {
-                "title": "Documentation Source",
+                "title": "Common Questions",
                 "path": "help-center/faq/getting-started"
               }
             ]
@@ -120,8 +181,8 @@
             "expandable": false,
             "pages": [
               {
-                "title": "Page Missing in Sidebar",
-                "path": "help-center/troubleshooting/install-error"
+                "title": "Common API Errors",
+                "path": "help-center/troubleshooting/common-errors"
               }
             ]
           },
@@ -131,8 +192,8 @@
             "expandable": false,
             "pages": [
               {
-                "title": "Create Your First Page",
-                "path": "help-center/guides/setup-project"
+                "title": "PMS Integration Guide",
+                "path": "help-center/guides/setup-pms-integration"
               }
             ]
           }
