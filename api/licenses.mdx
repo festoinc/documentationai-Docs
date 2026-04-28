@@ -37,6 +37,7 @@ License endpoints allow PMs to manage property license information required by t
 
 ```bash
 curl -G "https://apidemo.mybookingpal.com/license/61692799?jwt=TOKEN"
+  -H "x-api-key: YOUR_API_KEY" \
 ```
 
 ---
@@ -57,6 +58,7 @@ License details must comply with the requirements obtained from the GET `/licens
 
 ```bash
 curl -X PUT "https://apidemo.mybookingpal.com/license/61692799?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "data": [
@@ -84,4 +86,5 @@ curl -X PUT "https://apidemo.mybookingpal.com/license/61692799?jwt=TOKEN" \
 
 ```bash
 curl -G "https://apidemo.mybookingpal.com/license/requirements/61692799?jwt=TOKEN"
+  -H "x-api-key: YOUR_API_KEY" \
 ```

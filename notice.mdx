@@ -34,9 +34,10 @@ All parameters in API requests are **case sensitive** and must be used exactly a
 - Successful `DELETE` requests return `200` with an empty response body
 
 ### Authentication
-- Tokens are valid for **120 minutes**
+- Every request requires **both** credentials:
+  - `x-api-key` **header** — your permanent API key provided by BookingPal
+  - `jwt` **query parameter** — session token (valid for **120 minutes**)
 - Two token types: **PMS-level** and **PM-level**
-- Pass the token as a `jwt` **query parameter** in every request
 - Incoming push/webhook endpoints use `x-api-key` header for verification
 
 ### Rate Limits

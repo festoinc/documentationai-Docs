@@ -46,6 +46,7 @@ You must **always send the complete list** of fees and taxes. Any fees or taxes 
 
 ```bash
 curl -X POST "https://apidemo.mybookingpal.com/taxfee?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "data": {
@@ -124,6 +125,7 @@ Returns whether fees and taxes are mandatory for each property.
 
 ```bash
 curl -X POST "https://apidemo.mybookingpal.com/validation-settings/import-update?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "data": {
@@ -148,6 +150,7 @@ Resets property-level fee and tax settings to defaults (both mandatory).
 
 ```bash
 curl -X POST "https://apidemo.mybookingpal.com/validation-settings/removed?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"data": [1235124634]}'
 ```

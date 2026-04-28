@@ -38,6 +38,7 @@ Rates and Availability endpoints allow PMs to set per-night pricing and availabi
 
 ```bash
 curl -X POST "https://apidemo.mybookingpal.com/ra?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "data": {
@@ -95,5 +96,6 @@ curl -X POST "https://apidemo.mybookingpal.com/ra?jwt=TOKEN" \
 
 ```bash
 curl -G "https://apidemo.mybookingpal.com/ra/1235124634?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json"
 ```

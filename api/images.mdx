@@ -46,6 +46,7 @@ Adds a single image to the **end** of the image list. The first image ever sent 
 
 ```bash
 curl -X POST "https://apidemo.mybookingpal.com/image?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "data": {
@@ -72,6 +73,7 @@ Replaces **all** images for a property. Images are sorted in the order sent. The
 
 ```bash
 curl -X PUT "https://apidemo.mybookingpal.com/image?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "data": {
@@ -100,6 +102,7 @@ curl -X PUT "https://apidemo.mybookingpal.com/image?jwt=TOKEN" \
 
 ```bash
 curl -G "https://apidemo.mybookingpal.com/image/1235124634?jwt=TOKEN"
+  -H "x-api-key: YOUR_API_KEY" \
 ```
 
 **Response:**
@@ -136,6 +139,7 @@ Delete one or more specific images from a property.
 
 ```bash
 curl -X POST "https://apidemo.mybookingpal.com/image/delete?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "data": {

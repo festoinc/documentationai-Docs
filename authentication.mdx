@@ -3,12 +3,15 @@ title: Authentication
 description: JWT-based authentication for the BookingPal Supplier API.
 ---
 
-##  Overview
+## Overview
 
-The BookingPal Supplier API uses **JWT (JSON Web Token)** authentication. You obtain a token via the Login endpoint and include it as a query parameter in every request.
+The BookingPal Supplier API uses **two-layer authentication** for all requests:
 
-<Callout kind="info">
-All API calls (except incoming push/webhook endpoints) require a valid JWT token. Tokens expire after **120 minutes**.
+1. **JWT Token** — passed as a `jwt` query parameter, obtained via the Login endpoint.
+2. **API Key** — passed as an `x-api-key` HTTP header, provided by BookingPal during onboarding.
+
+<Callout kind="alert">
+All API calls (except incoming push/webhook endpoints) require **both** a valid JWT token **and** an `x-api-key` header. Tokens expire after **120 minutes**.
 </Callout>
 
 ## How Authentication Works
@@ -17,11 +20,11 @@ All API calls (except incoming push/webhook endpoints) require a valid JWT token
   <Step title="Login" icon="key">
     Call `GET /authc/login` with your `username` (email) and `password` as query parameters. The response contains a JWT token.
   </Step>
-  <Step title="Use the token" icon="send">
-    Include the token as a `jwt` query parameter in every subsequent API request.
+  <Step title="Use both credentials" icon="send">
+    Include the JWT token as a `jwt` query parameter **and** your API key as an `x-api-key` header in every subsequent API request.
   </Step>
   <Step title="Refresh when expired" icon="refresh-cw">
-    Tokens are valid for 120 minutes. Call the Login endpoint again to obtain a new token before the current one expires.
+    Tokens are valid for 120 minutes. Call the Login endpoint again to obtain a new token before the current one expires. The `x-api-key` header remains the same.
   </Step>
 </Steps>
 
@@ -63,17 +66,21 @@ curl -G "https://apidemo.mybookingpal.com/authc/login" \
 }
 ```
 
-## Using the Token
+## Using the Credentials
 
-Pass the token as a `jwt` query parameter in every request:
+Every authenticated request requires **both** credentials:
+
+- `jwt` query parameter — your session token
+- `x-api-key` header — your permanent API key
 
 ```bash
 curl -G "https://apidemo.mybookingpal.com/pmlist" \
+  -H "x-api-key: YOUR_API_KEY" \
   --data-urlencode "jwt=YOUR_TOKEN_HERE"
 ```
 
 <Callout kind="tip">
-Implement token caching in your application. Store the token and its expiration time. Re-authenticate only when the token is about to expire.
+Implement token caching in your application. Store the token and its expiration time. Re-authenticate only when the token is about to expire. The `x-api-key` header stays constant across sessions.
 </Callout>
 
 ## Token Types
@@ -117,7 +124,7 @@ Push notification endpoints (webhooks) sent **from** BookingPal to **your** serv
 
 <Columns cols={2}>
   <Card title="Reservation Push" icon="shield" horizontal="false">
-    Verified via the `x-api-key` header included in the request. Confirm the notification is from BookingPal.
+    Verified via the `x-api-key` header included in the request. Confirm the notification is from BookingPal by validating this key.
   </Card>
   <Card title="Async Push" icon="zap" horizontal="false">
     No authentication. These are informational notifications sent to your `asyncPush` endpoint.
@@ -129,13 +136,14 @@ Push notification endpoints (webhooks) sent **from** BookingPal to **your** serv
 | Status Code | Description |
 |---|---|
 | `422` | Username or password is empty |
-| `401` | Invalid credentials or expired token |
+| `401` | Invalid credentials, expired token, or missing `x-api-key` header |
 | `403` | Insufficient permissions for the requested operation |
 
 <Expandable title="Why am I getting a 401?" default-open="false">
 
 Verify that:
 
+- The `x-api-key` header is included in every request.
 - The token is valid and has not expired (120-minute lifetime).
 - The token is passed as the `jwt` **query parameter**, not in headers.
 - You are using the correct credential type (PMS vs PM) for the endpoint.

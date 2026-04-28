@@ -15,10 +15,15 @@ Tokens are valid for **120 minutes**. You should implement token caching and re-
 </Expandable>
 
 <Expandable title="How do I pass the token in requests?" default-open="false">
-Pass the JWT token as a `jwt` **query parameter** in every request URL:
+Pass the JWT token as a `jwt` **query parameter** and your API key as an `x-api-key` **header** in every request:
 ```
-https://apidemo.mybookingpal.com/pmlist?jwt=YOUR_TOKEN
+curl -G "https://apidemo.mybookingpal.com/pmlist?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY"
 ```
+</Expandable>
+
+<Expandable title="What is the x-api-key header?" default-open="false">
+The `x-api-key` is a permanent API key provided by BookingPal during onboarding. It must be included as an HTTP header in **every authenticated request**, alongside the JWT token. It identifies your integration and is used to verify that requests originate from an authorized source.
 </Expandable>
 
 ## Products & Properties

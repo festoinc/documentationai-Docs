@@ -38,6 +38,7 @@ Length-of-Stay (LOS) pricing allows PMs to set total prices for different stay d
 
 ```bash
 curl -X POST "https://apidemo.mybookingpal.com/losrates?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "data": {
@@ -72,4 +73,5 @@ The `losValue` array contains total rates for stays of 1, 2, 3, ... up to 46 nig
 
 ```bash
 curl -G "https://apidemo.mybookingpal.com/losrates/1235124634?jwt=TOKEN"
+  -H "x-api-key: YOUR_API_KEY" \
 ```

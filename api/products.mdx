@@ -49,6 +49,7 @@ Each request can include only **one product**. When updating, you must include a
 
 ```bash
 curl -X POST "https://apidemo.mybookingpal.com/product?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "data": {
@@ -109,6 +110,7 @@ Same body as Create, but must include the product `id` field. Any fields not inc
 
 ```bash
 curl -G "https://apidemo.mybookingpal.com/product?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY" \
   --data-urlencode "page=1" \
   --data-urlencode "limit=25"
 ```
@@ -156,6 +158,7 @@ You will receive asynchronous push messages when validation is complete, indicat
 
 ```bash
 curl -X POST "https://apidemo.mybookingpal.com/product/activation?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"data": [1235124634, 1235124636]}'
 ```
@@ -185,6 +188,7 @@ Deactivates properties and closes calendars on all channels where they are liste
 
 ```bash
 curl -X POST "https://apidemo.mybookingpal.com/product/deactivation?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{"data": [1235124634, 1235124636]}'
 ```

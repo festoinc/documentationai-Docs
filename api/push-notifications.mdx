@@ -34,6 +34,7 @@ Set the `reservationLink` **only after** implementing the General Reservation No
 
 ```bash
 curl -X POST "https://apidemo.mybookingpal.com/info?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "data": {
@@ -68,6 +69,7 @@ curl -X POST "https://apidemo.mybookingpal.com/info?jwt=TOKEN" \
 
 ```bash
 curl -G "https://apidemo.mybookingpal.com/info?jwt=TOKEN"
+  -H "x-api-key: YOUR_API_KEY" \
 ```
 
 ---

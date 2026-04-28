@@ -101,7 +101,7 @@ BookingPal sends push notifications to your configured endpoints for real-time e
 
 <Columns cols={2}>
   <Card title="Reservation Push" icon="bookmark" href="/api/reservation-notifications" horizontal="false">
-    New, updated, and cancelled reservations. Sent to your `reservationLink`.
+    New, updated, and cancelled reservations. Sent to your `reservationLink`. Verified via `x-api-key` header.
   </Card>
   <Card title="Async Push" icon="zap" href="/api/push-notifications" horizontal="false">
     Validation results, image processing, RA/LOS/fee imports. Sent to your `asyncPush` endpoint.
@@ -109,7 +109,7 @@ BookingPal sends push notifications to your configured endpoints for real-time e
 </Columns>
 
 <Callout kind="alert">
-Set the `reservationLink` **only after** implementing the General Reservation Notification handler. Once set, all reservation events will be sent to that endpoint.
+Set the `reservationLink` **only after** implementing the General Reservation Notification handler. Once set, all reservation events will be sent to that endpoint. Validate the `x-api-key` header to confirm requests originate from BookingPal.
 </Callout>
 
 ## Fees and Taxes

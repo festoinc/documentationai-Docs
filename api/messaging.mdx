@@ -52,6 +52,7 @@ Message data exists only when guests create messages via a connected channel. Fo
 
 ```bash
 curl -G "https://apidemo.mybookingpal.com/message/allthreads/all?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY" \
   --data-urlencode "page=1" \
   --data-urlencode "limit=10"
 ```
@@ -82,6 +83,7 @@ curl -G "https://apidemo.mybookingpal.com/message/allthreads/all?jwt=TOKEN" \
 
 ```bash
 curl -X POST "https://apidemo.mybookingpal.com/message/allThreadsSearch?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "data": {
@@ -107,6 +109,7 @@ curl -X POST "https://apidemo.mybookingpal.com/message/allThreadsSearch?jwt=TOKE
 
 ```bash
 curl -X POST "https://apidemo.mybookingpal.com/message?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "data": {

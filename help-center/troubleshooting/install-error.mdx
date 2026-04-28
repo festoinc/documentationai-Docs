@@ -29,6 +29,9 @@ curl -G "https://apidemo.mybookingpal.com/authc/login"
 ### 401 — Unauthorized
 
 <Steps>
+  <Step title="Check x-api-key header" icon="shield">
+    Ensure the `x-api-key` header is included in every request. This is a permanent API key provided by BookingPal.
+  </Step>
   <Step title="Check token validity" icon="clock">
     Tokens expire after 120 minutes. Re-authenticate to get a new token.
   </Step>

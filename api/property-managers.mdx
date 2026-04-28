@@ -99,6 +99,7 @@ All fields in the request body are mandatory.
 
 ```bash
 curl -X POST "https://apidemo.mybookingpal.com/pm?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "data": {
@@ -215,6 +216,7 @@ curl -X POST "https://apidemo.mybookingpal.com/pm?jwt=TOKEN" \
 
 ```bash
 curl -G "https://apidemo.mybookingpal.com/pm/61692799?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json"
 ```
 
@@ -232,6 +234,7 @@ Returns all Property Managers associated with your PMS.
 
 ```bash
 curl -G "https://apidemo.mybookingpal.com/pmlist?jwt=TOKEN"
+  -H "x-api-key: YOUR_API_KEY" \
 ```
 
 **Response:**
@@ -272,5 +275,6 @@ Uploads an image associated with the property host. Maximum file size: **1MB**.
 
 ```bash
 curl -X POST "https://apidemo.mybookingpal.com/pm/upload-host-image?jwt=TOKEN" \
+  -H "x-api-key: YOUR_API_KEY" \
   -F "image=@/path/to/host-image.jpg"
 ```
